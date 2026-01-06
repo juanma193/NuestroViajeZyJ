@@ -17,28 +17,41 @@
     </div>
   </div>
 
-  <button class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 mb-6" (click)="agregarTarea()">➕ Agregar Tarea</button>
+  <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+    <div class="flex flex-col items-center gap-4">
+      <svg class="w-14 h-14 text-pink-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+      </svg>
+      <span class="text-white font-semibold">Guardando...</span>
+    </div>
+  </div>
+
+  <button class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 mb-6" (click)="abrirModal()">➕ Agregar Tarea</button>
 
   <div class="flex flex-wrap gap-2 mb-6">
-    @for (categoria of categorias; track categoria) {
-      <button (click)="cambiarCategoria(categoria)" [ngClass]="{ 'bg-pink-300 text-white': categoriaSeleccionada === categoria }" class="px-3 py-1 rounded-full border">{{ categoria }}</button>
-    }
+    <button *ngFor="let cat of categorias" (click)="cambiarCategoria(cat)" [ngClass]="{ 'bg-pink-300 text-white': categoriaSeleccionada === cat.id }" class="px-3 py-1 rounded-full border">{{ cat.nombre }}</button>
   </div>
 
   <div class="space-y-3">
-    @for (tarea of tareasFiltradas; track tarea.id) {
-      <div class="flex items-center justify-between bg-white p-4 rounded-lg shadow" [ngClass]="{ 'opacity-60 line-through': tarea.completada }">
-        <div class="flex items-center gap-4">
-          <input type="checkbox" [checked]="tarea.completada" (change)="toggleCompletada(tarea)" [id]="'tarea-' + tarea.id" class="w-5 h-5" />
-          <div>
-            <h3 class="font-semibold">{{ tarea.titulo }}</h3>
-            <div class="text-sm text-gray-500"> <span class="mr-2">{{ tarea.categoria }}</span> <span class="bg-gray-100 px-2 py-0.5 rounded text-xs">Prioridad: {{ tarea.prioridad }}</span></div>
-          </div>
+    <div *ngIf="!cargando && tareasFiltradas.length === 0" class="text-center py-8 text-gray-500">No hay tareas en esta categoría</div>
+
+    <div *ngFor="let tarea of tareasFiltradas" class="flex items-center justify-between bg-white p-4 rounded-lg shadow" [ngClass]="{ 'opacity-60 line-through': tarea.completada }">
+      <div class="flex items-center gap-4">
+        <input type="checkbox" [checked]="tarea.completada" (change)="toggleCompletada(tarea)" [id]="'tarea-' + tarea.id" class="w-5 h-5" />
+        <div>
+          <h3 class="font-semibold">{{ tarea.titulo }}</h3>
+          <div class="text-sm text-gray-500"> <span class="mr-2">{{ getCategoriaNombre(tarea.categoria_id) }}</span> <span class="bg-gray-100 px-2 py-0.5 rounded text-xs">Prioridad: {{ tarea.prioridad }}</span></div>
         </div>
-        <button class="text-red-500" (click)="eliminarTarea(tarea.id)">🗑️</button>
       </div>
-    } @empty {
-      <div class="text-center py-8 text-gray-500">No hay tareas en esta categoría</div>
-    }
+      <div class="flex items-center gap-2">
+        <button class="px-3 py-1 rounded-md text-sm" (click)="abrirModal(tarea)">✏️</button>
+        <button class="text-red-500" (click)="abrirModalConfirm(tarea.id)">🗑️</button>
+      </div>
+    </div>
   </div>
+
+  <app-modal-tarea *ngIf="mostrarModal" [categorias]="categoriasSinTodas" [tareaEditar]="tareaEditar" (cerrar)="cerrarModal()" (guardar)="agregarTarea($event)"></app-modal-tarea>
+
+  <app-modal-confirm *ngIf="mostrarModalConfirm" [titulo]="'Eliminar tarea'" [mensaje]="'¿Eliminar esta tarea?'" (cancelar)="cerrarModalConfirm()" (confirmar)="confirmarEliminar()"></app-modal-confirm>
 </div>

@@ -4,6 +4,7 @@ import { PeliculasService } from '../../core/services/peliculas.service';
 import { Pelicula } from '../../core/models/pelicula.model';
 import { ModalPeliculaComponent } from './modal-pelicula/modal-pelicula.component';
 import { ModalConfirmComponent } from './modal-confirm/modal-confirm.component';
+import { ToastService } from '../../core/toast/services/toast.service';
 
 @Component({
   selector: 'app-peliculas',
@@ -21,7 +22,8 @@ export class PeliculasComponent implements OnInit {
 
   constructor(
     private peliculasService: PeliculasService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private toastService: ToastService
   ) {}
 
   async ngOnInit() {
@@ -72,13 +74,14 @@ export class PeliculasComponent implements OnInit {
         console.log('Película guardada exitosamente');
         this.cerrarModal();
         await this.cargarPeliculas();
+        this.toastService.showSuccess('Éxito', 'Película guardada correctamente');
       } else {
         console.error('No se pudo guardar la película');
-        alert('Error al guardar la película. Por favor, intenta de nuevo.');
+        this.toastService.showError('Error', 'Error al guardar la película. Por favor, intenta de nuevo.');
       }
     } catch (error) {
       console.error('Error al guardar película:', error);
-      alert('Error al guardar la película. Por favor, intenta de nuevo.');
+      this.toastService.showError('Error', 'Error al guardar la película. Por favor, intenta de nuevo.');
     } finally {
       this.cargando = false;
       this.cdr.detectChanges();
@@ -131,12 +134,13 @@ export class PeliculasComponent implements OnInit {
         const exito = await this.peliculasService.eliminarPelicula(idAEliminar);
         if (exito) {
           await this.cargarPeliculas();
+          this.toastService.showSuccess('Éxito', 'Película eliminada correctamente');
         } else {
-          alert('No se pudo eliminar la película.');
+          this.toastService.showError('Error', 'No se pudo eliminar la película.');
         }
       } catch (error) {
         console.error('Error eliminando película:', error);
-        alert('Error eliminando la película.');
+        this.toastService.showError('Error', 'Error eliminando la película.');
       } finally {
         this.cargando = false;
         this.cdr.detectChanges();

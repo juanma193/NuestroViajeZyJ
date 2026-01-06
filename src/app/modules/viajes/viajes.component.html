@@ -1,32 +1,57 @@
 <div class="max-w-5xl mx-auto p-6">
   <h1 class="text-2xl font-bold text-pink-600">🌍 Sección de Viajes</h1>
   <p class="text-gray-600 mb-6">Planifica y guarda todos tus viajes juntos</p>
+  <button class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 mb-6" (click)="abrirModal()">➕ Agregar Viaje</button>
 
-  <button class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 mb-6" (click)="agregarViaje()">➕ Agregar Viaje</button>
-
-  <div class="grid gap-4">
-    @for (viaje of viajes; track viaje.id) {
-      <div class="bg-white rounded-xl p-4 shadow flex flex-col" [ngClass]="{ 'opacity-80': viaje.completado }">
-        <div class="flex justify-between items-start mb-2">
-          <h3 class="text-lg font-semibold">{{ viaje.titulo }}</h3>
-          <button class="text-red-500" (click)="eliminarViaje(viaje.id)">🗑️</button>
-        </div>
-
-        <div class="text-sm text-gray-600 mb-4">
-          <p class="mb-1">📅 {{ viaje.fecha }}</p>
-          <p>{{ viaje.descripcion }}</p>
-        </div>
-
-        <div class="mt-auto">
-          <button class="px-3 py-2 rounded-md border text-pink-600" (click)="toggleCompletado(viaje)" [ngClass]="{ 'bg-pink-600 text-white': viaje.completado }">{{ viaje.completado ? '✅ Realizado' : '⏳ Pendiente' }}</button>
-        </div>
-      </div>
-    }
+  <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+    <div class="flex flex-col items-center gap-4">
+      <svg class="w-14 h-14 text-pink-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+      </svg>
+      <span class="text-white font-semibold">Cargando...</span>
+    </div>
   </div>
 
-  @if (viajes.length === 0) {
-    <div class="text-center py-12 text-gray-500">
+  <div class="grid gap-4">
+    <div *ngIf="!cargando && viajes.length === 0" class="text-center py-12 text-gray-500">
       <p>No hay viajes planificados aún. ¡Agrega tu primer viaje!</p>
     </div>
-  }
+
+    <div class="grid gap-4" *ngIf="!cargando">
+      <ng-container *ngFor="let viaje of viajes">
+        <div class="bg-white rounded-xl p-4 shadow flex flex-col" [ngClass]="{ 'opacity-80': viaje.estado }">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="text-lg font-semibold">{{ viaje.nombre }}</h3>
+            <button class="text-red-500" (click)="abrirModalConfirm(viaje.id, viaje.nombre)">🗑️</button>
+          </div>
+
+          <div class="text-sm text-gray-600 mb-4">
+            <p class="mb-1">📅 {{ viaje.fecha_desde }} {{ viaje.fecha_hasta ? ' al ' + viaje.fecha_hasta : '' }}</p>
+            <p>{{ viaje.descripcion }}</p>
+          </div>
+
+          <div class="mt-auto">
+            <button class="px-3 py-2 rounded-md border text-pink-600" (click)="toggleEstado(viaje)">
+              {{ viaje.estado ? '✅ Realizado' : '⏳ Pendiente' }}
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <app-modal-viaje
+    *ngIf="mostrarModal"
+    (cerrar)="cerrarModal()"
+    (guardar)="agregarViaje($event)">
+  </app-modal-viaje>
+
+  <app-modal-confirm
+    *ngIf="mostrarModalConfirm"
+    [titulo]="'Eliminar viaje'"
+    [mensaje]="'¿Eliminar ' + viajeAEliminarNombre + '?'"
+    (cancelar)="cerrarModalConfirm()"
+    (confirmar)="confirmarEliminar()">
+  </app-modal-confirm>
 </div>

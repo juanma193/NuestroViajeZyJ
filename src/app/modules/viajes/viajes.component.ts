@@ -1,57 +1,127 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ModalViajeComponent } from './modal-viaje/modal-viaje.component';
+import { ModalConfirmComponent } from '../peliculas/modal-confirm/modal-confirm.component';
+import { ViajesService } from '../../core/services/viajes.service';
+import { Viaje } from '../../core/models/viaje.model';
+import { ToastService } from '../../core/toast/services/toast.service';
 
 @Component({
   selector: 'app-viajes',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ModalViajeComponent, ModalConfirmComponent],
   templateUrl: './viajes.component.html',
 })
-export class ViajesComponent {
-  viajes = [
-    {
-      id: 1,
-      titulo: 'Viaje a París',
-      fecha: '15-20 Marzo 2026',
-      descripcion: 'Un viaje romántico por la ciudad del amor',
-      imagen: 'assets/paris.jpg',
-      completado: false
-    },
-    {
-      id: 2,
-      titulo: 'Playa en Cancún',
-      fecha: '10-17 Julio 2026',
-      descripcion: 'Descanso en el caribe mexicano',
-      imagen: 'assets/cancun.jpg',
-      completado: false
-    },
-    {
-      id: 3,
-      titulo: 'Aventura en Japón',
-      fecha: '1-15 Octubre 2026',
-      descripcion: 'Cultura, templos y comida deliciosa',
-      imagen: 'assets/japon.jpg',
-      completado: false
+export class ViajesComponent implements OnInit {
+  viajes: Viaje[] = [];
+  cargando = true;
+  mostrarModal = false;
+  mostrarModalConfirm = false;
+  viajeAEliminarId?: number;
+  viajeAEliminarNombre = '';
+
+  constructor(
+    private viajesService: ViajesService,
+    private cdr: ChangeDetectorRef,
+    private toastService: ToastService
+  ) {}
+
+  async ngOnInit() {
+    await this.cargarViajes();
+  }
+
+  async cargarViajes() {
+    try {
+      this.cargando = true;
+      this.cdr.detectChanges();
+      this.viajes = await this.viajesService.obtenerViajes();
+    } catch (error) {
+      console.error('Error cargando viajes:', error);
+      this.viajes = [];
+    } finally {
+      this.cargando = false;
+      this.cdr.detectChanges();
     }
-  ];
-
-  agregarViaje() {
-    const nuevoViaje = {
-      id: this.viajes.length + 1,
-      titulo: 'Nuevo Viaje',
-      fecha: 'Por definir',
-      descripcion: 'Edita los detalles del viaje',
-      imagen: 'assets/default.jpg',
-      completado: false
-    };
-    this.viajes.push(nuevoViaje);
   }
 
-  eliminarViaje(id: number) {
-    this.viajes = this.viajes.filter(v => v.id !== id);
+  abrirModal() {
+    this.mostrarModal = true;
   }
 
-  toggleCompletado(viaje: any) {
-    viaje.completado = !viaje.completado;
+  cerrarModal() {
+    this.mostrarModal = false;
+  }
+
+  async agregarViaje(viaje: Omit<Viaje, 'id' | 'created_at'>) {
+    try {
+      this.cargando = true;
+      this.cdr.detectChanges();
+      const res = await this.viajesService.agregarViaje(viaje);
+      if (res) {
+        this.cerrarModal();
+        await this.cargarViajes();
+        this.toastService.showSuccess('Éxito', 'Viaje creado correctamente');
+      } else {
+        this.toastService.showError('Error', 'No se pudo guardar el viaje');
+      }
+    } catch (error) {
+      console.error('Error agregando viaje:', error);
+      alert('Error al guardar el viaje');
+    } finally {
+      this.cargando = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  abrirModalConfirm(id?: number, nombre?: string) {
+    this.viajeAEliminarId = id;
+    this.viajeAEliminarNombre = nombre || '';
+    this.mostrarModalConfirm = true;
+  }
+
+  cerrarModalConfirm() {
+    this.mostrarModalConfirm = false;
+    this.viajeAEliminarId = undefined;
+    this.viajeAEliminarNombre = '';
+  }
+
+  async confirmarEliminar() {
+    if (this.viajeAEliminarId) {
+      const idAEliminar = this.viajeAEliminarId;
+      this.cerrarModalConfirm();
+      try {
+        this.cargando = true;
+        this.cdr.detectChanges();
+        const exito = await this.viajesService.eliminarViaje(idAEliminar);
+        if (exito) {
+          await this.cargarViajes();
+          this.toastService.showSuccess('Éxito', 'Viaje eliminado correctamente');
+        } else {
+          this.toastService.showError('Error', 'No se pudo eliminar el viaje');
+        }
+      } catch (error) {
+        console.error('Error eliminando viaje:', error);
+        this.toastService.showError('Error', 'Error eliminando el viaje');
+      } finally {
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
+    }
+  }
+
+  async toggleEstado(viaje: Viaje) {
+    if (!viaje.id) return;
+
+    try {
+      this.cargando = true;
+      this.cdr.detectChanges();
+      await this.viajesService.actualizarViaje(viaje.id, { estado: !viaje.estado });
+      await this.cargarViajes();
+    } catch (error) {
+      console.error('Error actualizando estado del viaje:', error);
+    } finally {
+      this.cargando = false;
+      this.cdr.detectChanges();
+    }
   }
 }

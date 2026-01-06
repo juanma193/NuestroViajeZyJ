@@ -2,6 +2,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Pelicula } from '../../../core/models/pelicula.model';
+import { ToastService } from '../../../core/toast/services/toast.service';
 
 @Component({
   selector: 'app-modal-pelicula',
@@ -21,6 +22,8 @@ export class ModalPeliculaComponent {
     visto: false
   };
 
+  constructor(private toastService: ToastService) {}
+
   onCerrar() {
     this.cerrar.emit();
   }
@@ -29,8 +32,9 @@ export class ModalPeliculaComponent {
     if (this.pelicula.nombre.trim()) {
       console.log('Emitiendo película:', this.pelicula);
       this.guardar.emit({...this.pelicula});
+      this.cerrar.emit();
     } else {
-      alert('Por favor, ingresa el nombre de la película');
+      this.toastService.showWarning('Falta información', 'Por favor, ingresa el nombre de la película');
     }
   }
 

@@ -1,0 +1,3 @@
+<ng-container *ngIf="showToast">
+  <app-toast [title]="toastTitle" [message]="toastMessage" [type]="toastType" (closed)="closeToast()"></app-toast>
+</ng-container>
