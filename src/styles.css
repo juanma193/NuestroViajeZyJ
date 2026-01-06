@@ -1,1 +1,7 @@
+/* Global reset to remove default body spacing so header can touch the top */
+html, body {
+	margin: 0;
+	padding: 0;
+}
+
 /* You can add global styles to this file, and also import other style files */

@@ -1,0 +1,230 @@
+.lugares-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  color: #FF69B4;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-size: 2.5rem;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.estadisticas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.stat-card.pendientes {
+  border-left: 5px solid #ffa500;
+}
+
+.stat-card.visitados {
+  border-left: 5px solid #FFB6C1;
+}
+
+.stat-card.total {
+  border-left: 5px solid #FF69B4;
+}
+
+.stat-numero {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #FF69B4;
+}
+
+.stat-label {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.btn-add {
+  display: block;
+  margin: 0 auto 2rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #FFB6C1, #FFF9C4);
+  color: #444;
+  border: none;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+  font-weight: 600;
+}
+
+.btn-add:hover {
+  transform: scale(1.05);
+}
+
+.tipos {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.btn-tipo {
+  padding: 0.6rem 1.2rem;
+  background: white;
+  border: 2px solid #FFB6C1;
+  color: #FF69B4;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.btn-tipo:hover {
+  background: #FFE5EC;
+}
+
+.btn-tipo.active {
+  background: #FFB6C1;
+  color: white;
+}
+
+.lugares-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.lugar-card {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.lugar-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.lugar-card.visitado {
+  background: #FFE5EC;
+  border: 2px solid #FFB6C1;
+}
+
+.lugar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tipo-badge {
+  padding: 0.4rem 1rem;
+  background: #FF69B4;
+  color: white;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.visitado-badge {
+  padding: 0.4rem 0.8rem;
+  background: #FFB6C1;
+  color: white;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.lugar-body {
+  flex: 1;
+  margin-bottom: 1rem;
+}
+
+.lugar-body h3 {
+  color: #FF69B4;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.4rem;
+}
+
+.ubicacion {
+  color: #666;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.descripcion {
+  color: #333;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+}
+
+.lugar-footer {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.btn-toggle {
+  flex: 1;
+  padding: 0.8rem;
+  border: 2px solid #FFB6C1;
+  background: white;
+  color: #FF69B4;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.btn-toggle:hover {
+  background: #FFB6C1;
+  color: white;
+}
+
+.btn-toggle.active {
+  background: #FFB6C1;
+  color: white;
+}
+
+.btn-delete {
+  background: #ff4444;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  transition: transform 0.2s;
+}
+
+.btn-delete:hover {
+  transform: scale(1.1);
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+  font-style: italic;
+}

@@ -1,0 +1,10 @@
+<div class="inicio-container">
+  <h2>🏠 Bienvenidos a Nuestro Espacio</h2>
+  <p class="intro">Este es nuestro rincón especial donde guardamos todos nuestros recuerdos y planes futuros. Explora las diferentes secciones usando el menú superior.</p>
+
+  <section class="mural" aria-label="Mural de fotos">
+    <figure class="tile" *ngFor="let photo of photos">
+      <img [src]="photo.src" [alt]="photo.alt" loading="lazy" decoding="async" />
+    </figure>
+  </section>
+</div>

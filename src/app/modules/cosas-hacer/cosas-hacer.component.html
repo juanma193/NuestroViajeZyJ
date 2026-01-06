@@ -1,0 +1,61 @@
+<div class="cosas-hacer-container">
+  <h1>✅ Cosas por Hacer</h1>
+  <p class="subtitle">Organiza tus tareas y pendientes</p>
+
+  <div class="estadisticas">
+    <div class="stat-card">
+      <span class="stat-numero">{{ tareasPendientes }}</span>
+      <span class="stat-label">Pendientes</span>
+    </div>
+    <div class="stat-card completadas">
+      <span class="stat-numero">{{ tareasCompletadas }}</span>
+      <span class="stat-label">Completadas</span>
+    </div>
+    <div class="stat-card total">
+      <span class="stat-numero">{{ tareas.length }}</span>
+      <span class="stat-label">Total</span>
+    </div>
+  </div>
+
+  <button class="btn-add" (click)="agregarTarea()">➕ Agregar Tarea</button>
+
+  <div class="categorias">
+    @for (categoria of categorias; track categoria) {
+      <button 
+        class="btn-categoria"
+        [class.active]="categoriaSeleccionada === categoria"
+        (click)="cambiarCategoria(categoria)">
+        {{ categoria }}
+      </button>
+    }
+  </div>
+
+  <div class="tareas-lista">
+    @for (tarea of tareasFiltradas; track tarea.id) {
+      <div class="tarea-card" [class.completada]="tarea.completada" [class]="'prioridad-' + tarea.prioridad">
+        <div class="tarea-checkbox">
+          <input 
+            type="checkbox" 
+            [checked]="tarea.completada"
+            (change)="toggleCompletada(tarea)"
+            [id]="'tarea-' + tarea.id">
+          <label [for]="'tarea-' + tarea.id"></label>
+        </div>
+
+        <div class="tarea-info">
+          <h3 [class.tachado]="tarea.completada">{{ tarea.titulo }}</h3>
+          <div class="tarea-meta">
+            <span class="categoria-badge">{{ tarea.categoria }}</span>
+            <span class="prioridad-badge">{{ tarea.prioridad }}</span>
+          </div>
+        </div>
+
+        <button class="btn-delete" (click)="eliminarTarea(tarea.id)">🗑️</button>
+      </div>
+    } @empty {
+      <div class="empty-state">
+        <p>No hay tareas en esta categoría</p>
+      </div>
+    }
+  </div>
+</div>

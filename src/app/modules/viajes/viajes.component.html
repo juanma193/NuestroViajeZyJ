@@ -1,0 +1,37 @@
+<div class="viajes-container">
+  <h1>🌍 Sección de Viajes</h1>
+  <p class="subtitle">Planifica y guarda todos tus viajes juntos</p>
+  
+  <button class="btn-add" (click)="agregarViaje()">➕ Agregar Viaje</button>
+
+  <div class="viajes-grid">
+    @for (viaje of viajes; track viaje.id) {
+      <div class="viaje-card" [class.completado]="viaje.completado">
+        <div class="viaje-header">
+          <h3>{{ viaje.titulo }}</h3>
+          <button class="btn-delete" (click)="eliminarViaje(viaje.id)">🗑️</button>
+        </div>
+        
+        <div class="viaje-body">
+          <p class="fecha">📅 {{ viaje.fecha }}</p>
+          <p class="descripcion">{{ viaje.descripcion }}</p>
+        </div>
+
+        <div class="viaje-footer">
+          <button 
+            class="btn-toggle" 
+            (click)="toggleCompletado(viaje)"
+            [class.active]="viaje.completado">
+            {{ viaje.completado ? '✅ Realizado' : '⏳ Pendiente' }}
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (viajes.length === 0) {
+    <div class="empty-state">
+      <p>No hay viajes planificados aún. ¡Agrega tu primer viaje!</p>
+    </div>
+  }
+</div>

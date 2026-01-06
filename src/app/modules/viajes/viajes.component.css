@@ -1,0 +1,135 @@
+.viajes-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  color: #FF69B4;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-size: 2.5rem;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.btn-add {
+  display: block;
+  margin: 0 auto 2rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #FFB6C1, #FFF9C4);
+  color: #444;
+  border: none;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+  font-weight: 600;
+}
+
+.btn-add:hover {
+  transform: scale(1.05);
+}
+
+.viajes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.viaje-card {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.viaje-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.viaje-card.completado {
+  opacity: 0.7;
+  background: #f0f0f0;
+}
+
+.viaje-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #FFB6C1;
+  padding-bottom: 0.5rem;
+}
+
+.viaje-header h3 {
+  color: #FF69B4;
+  margin: 0;
+}
+
+.btn-delete {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn-delete:hover {
+  transform: scale(1.2);
+}
+
+.viaje-body {
+  margin: 1rem 0;
+}
+
+.fecha {
+  color: #666;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.descripcion {
+  color: #333;
+  line-height: 1.5;
+}
+
+.viaje-footer {
+  margin-top: 1rem;
+}
+
+.btn-toggle {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #FFB6C1;
+  background: white;
+  color: #FF69B4;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.btn-toggle:hover {
+  background: #FFB6C1;
+  color: white;
+}
+
+.btn-toggle.active {
+  background: #FFB6C1;
+  color: white;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+  font-size: 1.2rem;
+}

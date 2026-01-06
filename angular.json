@@ -2,11 +2,12 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
-    "NuestroViajeZyJ_tmp": {
+    "NuestroViajeZyJ": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -22,6 +23,16 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/app/assets",
+                "output": "assets"
               }
             ],
             "styles": [
@@ -56,10 +67,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "NuestroViajeZyJ_tmp:build:production"
+              "buildTarget": "NuestroViajeZyJ:build:production"
             },
             "development": {
-              "buildTarget": "NuestroViajeZyJ_tmp:build:development"
+              "buildTarget": "NuestroViajeZyJ:build:development"
             }
           },
           "defaultConfiguration": "development"

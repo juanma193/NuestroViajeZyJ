@@ -1,0 +1,54 @@
+<div class="calendario-container">
+  <h1>📅 Calendario de Eventos</h1>
+  <p class="subtitle">Mantén un registro de fechas importantes</p>
+
+  <div class="calendario-header">
+    <button class="btn-nav" (click)="mesAnterior()">◀ Anterior</button>
+    <h2>{{ nombreMes }}</h2>
+    <button class="btn-nav" (click)="mesSiguiente()">Siguiente ▶</button>
+  </div>
+
+  <button class="btn-add" (click)="agregarEvento()">➕ Agregar Evento</button>
+
+  <div class="eventos-mes">
+    <h3>Eventos de este mes</h3>
+    @if (getEventosPorMes().length > 0) {
+      <div class="eventos-lista">
+        @for (evento of getEventosPorMes(); track evento.id) {
+          <div class="evento-card" [class]="'tipo-' + evento.tipo">
+            <div class="evento-fecha">
+              <span class="dia">{{ evento.fecha.split('-')[2] }}</span>
+              <span class="mes-num">{{ evento.fecha.split('-')[1] }}</span>
+            </div>
+            <div class="evento-info">
+              <h4>{{ evento.titulo }}</h4>
+              <p>{{ evento.descripcion }}</p>
+            </div>
+            <button class="btn-delete" (click)="eliminarEvento(evento.id)">🗑️</button>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="no-eventos">No hay eventos para este mes</p>
+    }
+  </div>
+
+  <div class="todos-eventos">
+    <h3>Todos los Eventos</h3>
+    <div class="eventos-lista">
+      @for (evento of eventos; track evento.id) {
+        <div class="evento-card" [class]="'tipo-' + evento.tipo">
+          <div class="evento-fecha">
+            <span class="dia">{{ evento.fecha.split('-')[2] }}</span>
+            <span class="mes-num">{{ evento.fecha.split('-')[1] }}/{{ evento.fecha.split('-')[0] }}</span>
+          </div>
+          <div class="evento-info">
+            <h4>{{ evento.titulo }}</h4>
+            <p>{{ evento.descripcion }}</p>
+          </div>
+          <button class="btn-delete" (click)="eliminarEvento(evento.id)">🗑️</button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,65 @@
+<div class="lugares-container">
+  <h1>📍 Lugares para Visitar</h1>
+  <p class="subtitle">Tu lista de destinos soñados</p>
+
+  <div class="estadisticas">
+    <div class="stat-card pendientes">
+      <span class="stat-numero">{{ lugaresPendientes }}</span>
+      <span class="stat-label">Por Visitar</span>
+    </div>
+    <div class="stat-card visitados">
+      <span class="stat-numero">{{ lugaresVisitados }}</span>
+      <span class="stat-label">Visitados</span>
+    </div>
+    <div class="stat-card total">
+      <span class="stat-numero">{{ lugares.length }}</span>
+      <span class="stat-label">Total</span>
+    </div>
+  </div>
+
+  <button class="btn-add" (click)="agregarLugar()">➕ Agregar Lugar</button>
+
+  <div class="tipos">
+    @for (tipo of tipos; track tipo) {
+      <button 
+        class="btn-tipo"
+        [class.active]="tipoSeleccionado === tipo"
+        (click)="cambiarTipo(tipo)">
+        {{ tipo }}
+      </button>
+    }
+  </div>
+
+  <div class="lugares-grid">
+    @for (lugar of lugaresFiltrados; track lugar.id) {
+      <div class="lugar-card" [class.visitado]="lugar.visitado">
+        <div class="lugar-header">
+          <div class="tipo-badge">{{ lugar.tipo }}</div>
+          @if (lugar.visitado) {
+            <span class="visitado-badge">✓ Visitado</span>
+          }
+        </div>
+
+        <div class="lugar-body">
+          <h3>{{ lugar.nombre }}</h3>
+          <p class="ubicacion">📍 {{ lugar.ciudad }}, {{ lugar.pais }}</p>
+          <p class="descripcion">{{ lugar.descripcion }}</p>
+        </div>
+
+        <div class="lugar-footer">
+          <button 
+            class="btn-toggle" 
+            (click)="toggleVisitado(lugar)"
+            [class.active]="lugar.visitado">
+            {{ lugar.visitado ? '✅ Visitado' : '🎯 Marcar como visitado' }}
+          </button>
+          <button class="btn-delete" (click)="eliminarLugar(lugar.id)">🗑️</button>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-state">
+        <p>No hay lugares en esta categoría</p>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,83 @@
+<div class="peliculas-container">
+  <h1>🎬 Películas y Series</h1>
+  <p class="subtitle">Tu lista de entretenimiento compartido</p>
+
+  <div *ngIf="cargando" class="cargando">
+    <p>Cargando películas...</p>
+  </div>
+
+  <div *ngIf="!cargando">
+    <div class="estadisticas">
+      <div class="stat-card pendientes">
+        <span class="stat-numero">{{ peliculasPendientes }}</span>
+        <span class="stat-label">Por Ver</span>
+      </div>
+      <div class="stat-card vistos">
+        <span class="stat-numero">{{ peliculasVistas }}</span>
+        <span class="stat-label">Vistos</span>
+      </div>
+      <div class="stat-card total">
+        <span class="stat-numero">{{ peliculas.length }}</span>
+        <span class="stat-label">Total</span>
+      </div>
+    </div>
+
+    <button class="btn-add" (click)="abrirModal()">➕ Agregar Película</button>
+
+    <div class="contenidos-grid">
+      <div *ngIf="peliculas.length === 0" class="empty-state">
+        <p>No hay películas agregadas aún. ¡Agrega tu primera película!</p>
+      </div>
+
+      <ng-container *ngFor="let pelicula of peliculas; let i = index">
+        <div class="contenido-card" [class.visto]="pelicula.visto">
+          <div class="contenido-header">
+            <div class="tipo-badge">🎬 Película</div>
+            <span class="visto-badge" *ngIf="pelicula.visto">✓ Visto</span>
+          </div>
+
+          <div class="contenido-body">
+            <h3>{{ pelicula.nombre }}</h3>
+            <p class="genero">Año: {{ pelicula.fecha_estreno }}</p>
+
+            <div class="valoracion">
+              <span
+                *ngFor="let estrella of getEstrellas(pelicula.puntuacion); let idx = index"
+                class="estrella"
+                [class.llena]="estrella === '★'"
+                (click)="setValoracion(pelicula, idx + 1)">
+                {{ estrella }}
+              </span>
+            </div>
+
+            <p class="notas" *ngIf="pelicula.comentario">💭 {{ pelicula.comentario }}</p>
+          </div>
+
+          <div class="contenido-footer">
+            <button
+              class="btn-toggle"
+              (click)="toggleVisto(pelicula)"
+              [class.active]="pelicula.visto">
+              {{ pelicula.visto ? '✅ Visto' : '👁️ Marcar como visto' }}
+            </button>
+            <button class="btn-delete" (click)="abrirModalConfirm(pelicula.id, pelicula.nombre)">🗑️</button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <app-modal-pelicula
+    *ngIf="mostrarModal"
+    (cerrar)="cerrarModal()"
+    (guardar)="agregarPelicula($event)">
+  </app-modal-pelicula>
+
+  <app-modal-confirm
+    *ngIf="mostrarModalConfirm"
+    [titulo]="'Eliminar película'"
+    [mensaje]="'¿Eliminar ' + peliculaAEliminarNombre + '?'"
+    (cancelar)="cerrarModalConfirm()"
+    (confirmar)="confirmarEliminar()">
+  </app-modal-confirm>
+</div>
