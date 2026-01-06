@@ -6,7 +6,6 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './calendario.component.html',
-  styleUrl: './calendario.component.css'
 })
 export class CalendarioComponent {
   mesActual = new Date();

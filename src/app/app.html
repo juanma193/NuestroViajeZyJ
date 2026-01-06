@@ -1,31 +1,23 @@
-<main class="page">
-  <div class="site-header">
-    <header class="header">
-      <h1>{{ title }}</h1>
-      <p class="subtitle">Nuestros recuerdos y planes juntos</p>
-    </header>
+<main class="min-h-screen bg-gray-50">
+  <header class="bg-gradient-to-r from-pink-200 to-yellow-200">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex items-center justify-between py-6">
+        <div>
+          <h1 class="text-2xl text-pink-400 font-extrabold">{{ title }}</h1>
+          <p class="text-sm text-gray-600">Nuestros recuerdos y planes juntos</p>
+        </div>
 
-    <nav class="navigation">
-    <a routerLink="/inicio" class="nav-button" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-      🏠 Inicio
-    </a>
-    <a routerLink="/viajes" class="nav-button" routerLinkActive="active">
-      🌍 Viajes
-    </a>
-    <a routerLink="/calendario" class="nav-button" routerLinkActive="active">
-      📅 Calendario
-    </a>
-    <a routerLink="/cosas-hacer" class="nav-button" routerLinkActive="active">
-      ✅ Cosas por Hacer
-    </a>
-    <a routerLink="/lugares" class="nav-button" routerLinkActive="active">
-      📍 Lugares
-    </a>
-    <a routerLink="/peliculas" class="nav-button" routerLinkActive="active">
-      🎬 Películas/Series
-    </a>
-    </nav>
-  </div>
+        <nav class="flex gap-3">
+          <a routerLink="/inicio" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="px-3 py-2 rounded-md hover:bg-white/40">🏠 Inicio</a>
+          <a routerLink="/viajes" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">🌍 Viajes</a>
+          <a routerLink="/calendario" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">📅 Calendario</a>
+          <a routerLink="/cosas-hacer" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">✅ Cosas por Hacer</a>
+          <a routerLink="/lugares" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">📍 Lugares</a>
+          <a routerLink="/peliculas" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">🎬 Películas/Series</a>
+        </nav>
+      </div>
+    </div>
+  </header>
 
   <router-outlet></router-outlet>
 </main>

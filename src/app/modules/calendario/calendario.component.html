@@ -1,52 +1,56 @@
-<div class="calendario-container">
-  <h1>📅 Calendario de Eventos</h1>
-  <p class="subtitle">Mantén un registro de fechas importantes</p>
+<div class="max-w-5xl mx-auto p-6">
+  <h1 class="text-2xl font-bold text-pink-600">📅 Calendario de Eventos</h1>
+  <p class="text-gray-600 mb-4">Mantén un registro de fechas importantes</p>
 
-  <div class="calendario-header">
-    <button class="btn-nav" (click)="mesAnterior()">◀ Anterior</button>
-    <h2>{{ nombreMes }}</h2>
-    <button class="btn-nav" (click)="mesSiguiente()">Siguiente ▶</button>
+  <div class="flex items-center gap-4 mb-4">
+    <button class="px-3 py-1 rounded-md border" (click)="mesAnterior()">◀ Anterior</button>
+    <h2 class="text-lg font-semibold">{{ nombreMes }}</h2>
+    <button class="px-3 py-1 rounded-md border" (click)="mesSiguiente()">Siguiente ▶</button>
   </div>
 
-  <button class="btn-add" (click)="agregarEvento()">➕ Agregar Evento</button>
+  <button class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 mb-6" (click)="agregarEvento()">➕ Agregar Evento</button>
 
-  <div class="eventos-mes">
-    <h3>Eventos de este mes</h3>
+  <div class="mb-6">
+    <h3 class="text-lg font-semibold mb-3">Eventos de este mes</h3>
     @if (getEventosPorMes().length > 0) {
-      <div class="eventos-lista">
+      <div class="grid gap-3">
         @for (evento of getEventosPorMes(); track evento.id) {
-          <div class="evento-card" [class]="'tipo-' + evento.tipo">
-            <div class="evento-fecha">
-              <span class="dia">{{ evento.fecha.split('-')[2] }}</span>
-              <span class="mes-num">{{ evento.fecha.split('-')[1] }}</span>
+          <div class="flex items-center justify-between bg-white p-4 rounded-lg shadow">
+            <div class="flex items-center gap-4">
+              <div class="text-center">
+                <div class="text-2xl font-bold">{{ evento.fecha.split('-')[2] }}</div>
+                <div class="text-sm text-gray-500">{{ evento.fecha.split('-')[1] }}</div>
+              </div>
+              <div>
+                <h4 class="font-semibold">{{ evento.titulo }}</h4>
+                <p class="text-sm text-gray-600">{{ evento.descripcion }}</p>
+              </div>
             </div>
-            <div class="evento-info">
-              <h4>{{ evento.titulo }}</h4>
-              <p>{{ evento.descripcion }}</p>
-            </div>
-            <button class="btn-delete" (click)="eliminarEvento(evento.id)">🗑️</button>
+            <button class="text-red-500" (click)="eliminarEvento(evento.id)">🗑️</button>
           </div>
         }
       </div>
     } @else {
-      <p class="no-eventos">No hay eventos para este mes</p>
+      <p class="text-gray-500">No hay eventos para este mes</p>
     }
   </div>
 
-  <div class="todos-eventos">
-    <h3>Todos los Eventos</h3>
-    <div class="eventos-lista">
+  <div>
+    <h3 class="text-lg font-semibold mb-3">Todos los Eventos</h3>
+    <div class="grid gap-3">
       @for (evento of eventos; track evento.id) {
-        <div class="evento-card" [class]="'tipo-' + evento.tipo">
-          <div class="evento-fecha">
-            <span class="dia">{{ evento.fecha.split('-')[2] }}</span>
-            <span class="mes-num">{{ evento.fecha.split('-')[1] }}/{{ evento.fecha.split('-')[0] }}</span>
+        <div class="flex items-center justify-between bg-white p-4 rounded-lg shadow">
+          <div class="flex items-center gap-4">
+            <div class="text-center">
+              <div class="text-2xl font-bold">{{ evento.fecha.split('-')[2] }}</div>
+              <div class="text-sm text-gray-500">{{ evento.fecha.split('-')[1] }}/{{ evento.fecha.split('-')[0] }}</div>
+            </div>
+            <div>
+              <h4 class="font-semibold">{{ evento.titulo }}</h4>
+              <p class="text-sm text-gray-600">{{ evento.descripcion }}</p>
+            </div>
           </div>
-          <div class="evento-info">
-            <h4>{{ evento.titulo }}</h4>
-            <p>{{ evento.descripcion }}</p>
-          </div>
-          <button class="btn-delete" (click)="eliminarEvento(evento.id)">🗑️</button>
+          <button class="text-red-500" (click)="eliminarEvento(evento.id)">🗑️</button>
         </div>
       }
     </div>

@@ -1,36 +1,31 @@
-<div class="viajes-container">
-  <h1>🌍 Sección de Viajes</h1>
-  <p class="subtitle">Planifica y guarda todos tus viajes juntos</p>
-  
-  <button class="btn-add" (click)="agregarViaje()">➕ Agregar Viaje</button>
+<div class="max-w-5xl mx-auto p-6">
+  <h1 class="text-2xl font-bold text-pink-600">🌍 Sección de Viajes</h1>
+  <p class="text-gray-600 mb-6">Planifica y guarda todos tus viajes juntos</p>
 
-  <div class="viajes-grid">
+  <button class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 mb-6" (click)="agregarViaje()">➕ Agregar Viaje</button>
+
+  <div class="grid gap-4">
     @for (viaje of viajes; track viaje.id) {
-      <div class="viaje-card" [class.completado]="viaje.completado">
-        <div class="viaje-header">
-          <h3>{{ viaje.titulo }}</h3>
-          <button class="btn-delete" (click)="eliminarViaje(viaje.id)">🗑️</button>
-        </div>
-        
-        <div class="viaje-body">
-          <p class="fecha">📅 {{ viaje.fecha }}</p>
-          <p class="descripcion">{{ viaje.descripcion }}</p>
+      <div class="bg-white rounded-xl p-4 shadow flex flex-col" [ngClass]="{ 'opacity-80': viaje.completado }">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="text-lg font-semibold">{{ viaje.titulo }}</h3>
+          <button class="text-red-500" (click)="eliminarViaje(viaje.id)">🗑️</button>
         </div>
 
-        <div class="viaje-footer">
-          <button 
-            class="btn-toggle" 
-            (click)="toggleCompletado(viaje)"
-            [class.active]="viaje.completado">
-            {{ viaje.completado ? '✅ Realizado' : '⏳ Pendiente' }}
-          </button>
+        <div class="text-sm text-gray-600 mb-4">
+          <p class="mb-1">📅 {{ viaje.fecha }}</p>
+          <p>{{ viaje.descripcion }}</p>
+        </div>
+
+        <div class="mt-auto">
+          <button class="px-3 py-2 rounded-md border text-pink-600" (click)="toggleCompletado(viaje)" [ngClass]="{ 'bg-pink-600 text-white': viaje.completado }">{{ viaje.completado ? '✅ Realizado' : '⏳ Pendiente' }}</button>
         </div>
       </div>
     }
   </div>
 
   @if (viajes.length === 0) {
-    <div class="empty-state">
+    <div class="text-center py-12 text-gray-500">
       <p>No hay viajes planificados aún. ¡Agrega tu primer viaje!</p>
     </div>
   }

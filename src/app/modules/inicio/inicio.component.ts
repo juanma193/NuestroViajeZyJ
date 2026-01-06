@@ -6,7 +6,6 @@ import { Component } from '@angular/core';
   standalone: true,
   imports: [NgFor],
   templateUrl: './inicio.component.html',
-  styleUrl: './inicio.component.css'
 })
 export class InicioComponent {
   readonly photos = [

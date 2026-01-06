@@ -10,7 +10,6 @@ import { ModalConfirmComponent } from './modal-confirm/modal-confirm.component';
   standalone: true,
   imports: [CommonModule, ModalPeliculaComponent, ModalConfirmComponent],
   templateUrl: './peliculas.component.html',
-  styleUrl: './peliculas.component.css'
 })
 export class PeliculasComponent implements OnInit {
   peliculas: Pelicula[] = [];
@@ -64,9 +63,11 @@ export class PeliculasComponent implements OnInit {
   async agregarPelicula(pelicula: Omit<Pelicula, 'id' | 'created_at'>) {
     try {
       console.log('Guardando película:', pelicula);
+      this.cargando = true;
+      this.cdr.detectChanges();
       const resultado = await this.peliculasService.agregarPelicula(pelicula);
       console.log('Resultado:', resultado);
-      
+
       if (resultado) {
         console.log('Película guardada exitosamente');
         this.cerrarModal();
@@ -78,15 +79,25 @@ export class PeliculasComponent implements OnInit {
     } catch (error) {
       console.error('Error al guardar película:', error);
       alert('Error al guardar la película. Por favor, intenta de nuevo.');
+    } finally {
+      this.cargando = false;
+      this.cdr.detectChanges();
     }
   }
 
   async toggleVisto(pelicula: Pelicula) {
     if (pelicula.id) {
-      await this.peliculasService.actualizarPelicula(pelicula.id, {
-        visto: !pelicula.visto
-      });
-      await this.cargarPeliculas();
+      try {
+        this.cargando = true;
+        this.cdr.detectChanges();
+        await this.peliculasService.actualizarPelicula(pelicula.id, { visto: !pelicula.visto });
+        await this.cargarPeliculas();
+      } catch (error) {
+        console.error('Error actualizando visto:', error);
+      } finally {
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
     }
   }
 
@@ -115,6 +126,8 @@ export class PeliculasComponent implements OnInit {
       this.cerrarModalConfirm();
 
       try {
+        this.cargando = true;
+        this.cdr.detectChanges();
         const exito = await this.peliculasService.eliminarPelicula(idAEliminar);
         if (exito) {
           await this.cargarPeliculas();
@@ -124,6 +137,9 @@ export class PeliculasComponent implements OnInit {
       } catch (error) {
         console.error('Error eliminando película:', error);
         alert('Error eliminando la película.');
+      } finally {
+        this.cargando = false;
+        this.cdr.detectChanges();
       }
     }
   }

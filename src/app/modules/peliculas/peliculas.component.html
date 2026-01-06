@@ -1,66 +1,64 @@
-<div class="peliculas-container">
-  <h1>🎬 Películas y Series</h1>
-  <p class="subtitle">Tu lista de entretenimiento compartido</p>
+<div class="mx-auto relative overflow-hidden min-h-[calc(100vh-140px)] p-8 bg-[url('/assets/fondo-peli.jpeg')] bg-cover bg-center bg-no-repeat">
+  <div class="pointer-events-none absolute inset-0 bg-white/70"></div>
 
-  <div *ngIf="cargando" class="cargando">
-    <p>Cargando películas...</p>
-  </div>
+  <div class="relative">
+    <!-- Loader overlay -->
+    <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+      <div class="flex flex-col items-center gap-4">
+        <svg class="w-14 h-14 text-pink-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <span class="text-white font-semibold">Cargando...</span>
+      </div>
+    </div>
+    <h1 class="text-3xl font-extrabold text-pink-500 text-center">🎬 Películas y Series</h1>
+    <p class="text-center text-gray-600 mb-8">Tu lista de entretenimiento compartido</p>
 
   <div *ngIf="!cargando">
-    <div class="estadisticas">
-      <div class="stat-card pendientes">
-        <span class="stat-numero">{{ peliculasPendientes }}</span>
-        <span class="stat-label">Por Ver</span>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 max-w-5xl mx-auto">
+      <div class="bg-white border rounded-xl shadow-lg p-5 text-center border-l-4 border-orange-400">
+        <span class="block text-3xl font-bold text-pink-500">{{ peliculasPendientes }}</span>
+        <span class="text-gray-600">Por Ver</span>
       </div>
-      <div class="stat-card vistos">
-        <span class="stat-numero">{{ peliculasVistas }}</span>
-        <span class="stat-label">Vistos</span>
+      <div class="bg-white border rounded-xl shadow-lg p-5 text-center border-l-4 border-pink-300">
+        <span class="block text-3xl font-bold text-pink-500">{{ peliculasVistas }}</span>
+        <span class="text-gray-600">Vistos</span>
       </div>
-      <div class="stat-card total">
-        <span class="stat-numero">{{ peliculas.length }}</span>
-        <span class="stat-label">Total</span>
+      <div class="bg-white border rounded-xl shadow-lg p-5 text-center border-l-4 border-pink-500">
+        <span class="block text-3xl font-bold text-pink-500">{{ peliculas.length }}</span>
+        <span class="text-gray-600">Total</span>
       </div>
     </div>
 
-    <button class="btn-add" (click)="abrirModal()">➕ Agregar Película</button>
+    <button class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-6 py-3 mx-auto block font-semibold mb-8" (click)="abrirModal()">➕ Agregar Película</button>
 
-    <div class="contenidos-grid">
-      <div *ngIf="peliculas.length === 0" class="empty-state">
+    <div class="max-w-5xl mx-auto grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div *ngIf="peliculas.length === 0" class="col-span-full text-center py-12 text-gray-500">
         <p>No hay películas agregadas aún. ¡Agrega tu primera película!</p>
       </div>
 
       <ng-container *ngFor="let pelicula of peliculas; let i = index">
-        <div class="contenido-card" [class.visto]="pelicula.visto">
-          <div class="contenido-header">
-            <div class="tipo-badge">🎬 Película</div>
-            <span class="visto-badge" *ngIf="pelicula.visto">✓ Visto</span>
+        <div class="bg-white rounded-2xl p-5 shadow-lg flex flex-col border border-pink-200">
+          <div class="flex justify-between items-center mb-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-50 text-pink-600 text-sm font-semibold">🎬 Película</div>
+            <span *ngIf="pelicula.visto" class="inline-flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">✓ Visto</span>
           </div>
 
-          <div class="contenido-body">
-            <h3>{{ pelicula.nombre }}</h3>
-            <p class="genero">Año: {{ pelicula.fecha_estreno }}</p>
+          <div class="flex-1 mb-4">
+            <h3 class="text-xl font-bold text-pink-600 mb-1">{{ pelicula.nombre }}</h3>
+            <p class="text-gray-600 font-semibold mb-3">Año: {{ pelicula.fecha_estreno }}</p>
 
-            <div class="valoracion">
-              <span
-                *ngFor="let estrella of getEstrellas(pelicula.puntuacion); let idx = index"
-                class="estrella"
-                [class.llena]="estrella === '★'"
-                (click)="setValoracion(pelicula, idx + 1)">
-                {{ estrella }}
-              </span>
+            <div class="flex gap-1 text-2xl mb-3">
+              <span *ngFor="let estrella of getEstrellas(pelicula.puntuacion); let idx = index" (click)="setValoracion(pelicula, idx + 1)" class="cursor-pointer" [ngClass]="{ 'text-yellow-400': estrella === '★', 'text-gray-300': estrella !== '★' }">{{ estrella }}</span>
             </div>
 
-            <p class="notas" *ngIf="pelicula.comentario">💭 {{ pelicula.comentario }}</p>
+            <p *ngIf="pelicula.comentario" class="text-sm italic text-gray-600 bg-gray-50 p-3 rounded-md">💭 {{ pelicula.comentario }}</p>
           </div>
 
-          <div class="contenido-footer">
-            <button
-              class="btn-toggle"
-              (click)="toggleVisto(pelicula)"
-              [class.active]="pelicula.visto">
-              {{ pelicula.visto ? '✅ Visto' : '👁️ Marcar como visto' }}
-            </button>
-            <button class="btn-delete" (click)="abrirModalConfirm(pelicula.id, pelicula.nombre)">🗑️</button>
+          <div class="flex gap-2 mt-auto">
+            <button class="flex-1 px-3 py-2 border border-pink-300 rounded-lg font-semibold" (click)="toggleVisto(pelicula)" [ngClass]="pelicula.visto ? 'bg-white text-pink-600' : 'bg-white text-pink-600'">{{ pelicula.visto ? '✅ Visto' : '👁️ Marcar como visto' }}</button>
+            <button class="px-3 py-2 bg-pink-500 text-white rounded-lg" (click)="abrirModalConfirm(pelicula.id, pelicula.nombre)">🗑️</button>
           </div>
         </div>
       </ng-container>
@@ -73,11 +71,12 @@
     (guardar)="agregarPelicula($event)">
   </app-modal-pelicula>
 
-  <app-modal-confirm
-    *ngIf="mostrarModalConfirm"
-    [titulo]="'Eliminar película'"
-    [mensaje]="'¿Eliminar ' + peliculaAEliminarNombre + '?'"
-    (cancelar)="cerrarModalConfirm()"
-    (confirmar)="confirmarEliminar()">
-  </app-modal-confirm>
+    <app-modal-confirm
+      *ngIf="mostrarModalConfirm"
+      [titulo]="'Eliminar película'"
+      [mensaje]="'¿Eliminar ' + peliculaAEliminarNombre + '?'"
+      (cancelar)="cerrarModalConfirm()"
+      (confirmar)="confirmarEliminar()">
+    </app-modal-confirm>
+  </div>
 </div>

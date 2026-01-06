@@ -1,65 +1,51 @@
-<div class="lugares-container">
-  <h1>📍 Lugares para Visitar</h1>
-  <p class="subtitle">Tu lista de destinos soñados</p>
+<div class="max-w-5xl mx-auto p-6">
+  <h1 class="text-2xl font-bold text-pink-600">📍 Lugares para Visitar</h1>
+  <p class="text-gray-600 mb-6">Tu lista de destinos soñados</p>
 
-  <div class="estadisticas">
-    <div class="stat-card pendientes">
-      <span class="stat-numero">{{ lugaresPendientes }}</span>
-      <span class="stat-label">Por Visitar</span>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-xl p-4 shadow text-center">
+      <span class="block text-3xl font-bold text-pink-500">{{ lugaresPendientes }}</span>
+      <span class="text-gray-600">Por Visitar</span>
     </div>
-    <div class="stat-card visitados">
-      <span class="stat-numero">{{ lugaresVisitados }}</span>
-      <span class="stat-label">Visitados</span>
+    <div class="bg-white rounded-xl p-4 shadow text-center">
+      <span class="block text-3xl font-bold text-pink-500">{{ lugaresVisitados }}</span>
+      <span class="text-gray-600">Visitados</span>
     </div>
-    <div class="stat-card total">
-      <span class="stat-numero">{{ lugares.length }}</span>
-      <span class="stat-label">Total</span>
+    <div class="bg-white rounded-xl p-4 shadow text-center">
+      <span class="block text-3xl font-bold text-pink-500">{{ lugares.length }}</span>
+      <span class="text-gray-600">Total</span>
     </div>
   </div>
 
-  <button class="btn-add" (click)="agregarLugar()">➕ Agregar Lugar</button>
+  <button class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 mb-6" (click)="agregarLugar()">➕ Agregar Lugar</button>
 
-  <div class="tipos">
+  <div class="flex flex-wrap gap-2 mb-6">
     @for (tipo of tipos; track tipo) {
-      <button 
-        class="btn-tipo"
-        [class.active]="tipoSeleccionado === tipo"
-        (click)="cambiarTipo(tipo)">
-        {{ tipo }}
-      </button>
+      <button (click)="cambiarTipo(tipo)" [ngClass]="{ 'bg-pink-300 text-white': tipoSeleccionado === tipo }" class="px-3 py-1 rounded-full border">{{ tipo }}</button>
     }
   </div>
 
-  <div class="lugares-grid">
+  <div class="grid gap-4">
     @for (lugar of lugaresFiltrados; track lugar.id) {
-      <div class="lugar-card" [class.visitado]="lugar.visitado">
-        <div class="lugar-header">
-          <div class="tipo-badge">{{ lugar.tipo }}</div>
-          @if (lugar.visitado) {
-            <span class="visitado-badge">✓ Visitado</span>
-          }
+      <div class="bg-white rounded-xl p-4 shadow" [ngClass]="{ 'opacity-80': lugar.visitado }">
+        <div class="flex justify-between items-center mb-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-50 text-pink-600 text-sm font-semibold">{{ lugar.tipo }}</div>
+          <span *ngIf="lugar.visitado" class="inline-flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">✓ Visitado</span>
         </div>
 
-        <div class="lugar-body">
-          <h3>{{ lugar.nombre }}</h3>
-          <p class="ubicacion">📍 {{ lugar.ciudad }}, {{ lugar.pais }}</p>
-          <p class="descripcion">{{ lugar.descripcion }}</p>
+        <div class="mb-3">
+          <h3 class="text-lg font-semibold">{{ lugar.nombre }}</h3>
+          <p class="text-sm text-gray-500">📍 {{ lugar.ciudad }}, {{ lugar.pais }}</p>
+          <p class="text-gray-700 mt-2">{{ lugar.descripcion }}</p>
         </div>
 
-        <div class="lugar-footer">
-          <button 
-            class="btn-toggle" 
-            (click)="toggleVisitado(lugar)"
-            [class.active]="lugar.visitado">
-            {{ lugar.visitado ? '✅ Visitado' : '🎯 Marcar como visitado' }}
-          </button>
-          <button class="btn-delete" (click)="eliminarLugar(lugar.id)">🗑️</button>
+        <div class="flex gap-2">
+          <button class="px-3 py-2 rounded-md border text-pink-600" (click)="toggleVisitado(lugar)" [ngClass]="{ 'bg-pink-600 text-white': lugar.visitado }">{{ lugar.visitado ? '✅ Visitado' : '🎯 Marcar como visitado' }}</button>
+          <button class="px-3 py-2 bg-red-500 text-white rounded-md" (click)="eliminarLugar(lugar.id)">🗑️</button>
         </div>
       </div>
     } @empty {
-      <div class="empty-state">
-        <p>No hay lugares en esta categoría</p>
-      </div>
+      <div class="text-center py-8 text-gray-500">No hay lugares en esta categoría</div>
     }
   </div>
 </div>

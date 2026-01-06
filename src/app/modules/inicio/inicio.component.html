@@ -1,10 +1,10 @@
-<div class="inicio-container">
-  <h2>🏠 Bienvenidos a Nuestro Espacio</h2>
-  <p class="intro">Este es nuestro rincón especial donde guardamos todos nuestros recuerdos y planes futuros. Explora las diferentes secciones usando el menú superior.</p>
+<div class="max-w-5xl mx-auto p-6">
+  <h2 class="text-2xl font-bold text-pink-600">🏠 Bienvenidos a Nuestro Espacio</h2>
+  <p class="text-gray-600 mb-6">Este es nuestro rincón especial donde guardamos todos nuestros recuerdos y planes futuros. Explora las diferentes secciones usando el menú superior.</p>
 
-  <section class="mural" aria-label="Mural de fotos">
-    <figure class="tile" *ngFor="let photo of photos">
-      <img [src]="photo.src" [alt]="photo.alt" loading="lazy" decoding="async" />
+  <section class="grid grid-cols-2 sm:grid-cols-4 gap-3" aria-label="Mural de fotos">
+    <figure class="aspect-square overflow-hidden rounded-lg" *ngFor="let photo of photos">
+      <img class="w-full h-full object-cover" [src]="photo.src" [alt]="photo.alt" loading="lazy" decoding="async" />
     </figure>
   </section>
 </div>

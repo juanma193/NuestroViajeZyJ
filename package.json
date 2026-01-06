@@ -1,5 +1,5 @@
 {
-  "name": "nuestro-viaje-zy-j-tmp",
+  "name": "nuestro-viaje-zy-j",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -37,8 +37,9 @@
     "@angular/build": "^21.0.4",
     "@angular/cli": "^21.0.4",
     "@angular/compiler-cli": "^21.0.0",
+    "autoprefixer": "^10.4.23",
     "jsdom": "^27.1.0",
-    "typescript": "~5.9.2",
-    "vitest": "^4.0.8"
+    "tailwindcss": "3.3.3",
+    "typescript": "~5.9.2"
   }
 }

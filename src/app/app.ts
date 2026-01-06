@@ -6,7 +6,6 @@ import { SupabaseService } from './core/supabase';
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.html',
-  styleUrls: ['./app.css']
 })
 export class App implements OnInit {
   readonly title = 'Nuestro diario';

@@ -8,7 +8,6 @@ import { Pelicula } from '../../../core/models/pelicula.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './modal-pelicula.component.html',
-  styleUrl: './modal-pelicula.component.css'
 })
 export class ModalPeliculaComponent {
   @Output() cerrar = new EventEmitter<void>();

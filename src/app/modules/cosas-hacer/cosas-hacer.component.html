@@ -1,61 +1,44 @@
-<div class="cosas-hacer-container">
-  <h1>✅ Cosas por Hacer</h1>
-  <p class="subtitle">Organiza tus tareas y pendientes</p>
+<div class="max-w-5xl mx-auto p-6">
+  <h1 class="text-2xl font-bold text-pink-600">✅ Cosas por Hacer</h1>
+  <p class="text-gray-600 mb-6">Organiza tus tareas y pendientes</p>
 
-  <div class="estadisticas">
-    <div class="stat-card">
-      <span class="stat-numero">{{ tareasPendientes }}</span>
-      <span class="stat-label">Pendientes</span>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-xl p-4 shadow text-center">
+      <span class="block text-3xl font-bold text-pink-500">{{ tareasPendientes }}</span>
+      <span class="text-gray-600">Pendientes</span>
     </div>
-    <div class="stat-card completadas">
-      <span class="stat-numero">{{ tareasCompletadas }}</span>
-      <span class="stat-label">Completadas</span>
+    <div class="bg-white rounded-xl p-4 shadow text-center">
+      <span class="block text-3xl font-bold text-pink-500">{{ tareasCompletadas }}</span>
+      <span class="text-gray-600">Completadas</span>
     </div>
-    <div class="stat-card total">
-      <span class="stat-numero">{{ tareas.length }}</span>
-      <span class="stat-label">Total</span>
+    <div class="bg-white rounded-xl p-4 shadow text-center">
+      <span class="block text-3xl font-bold text-pink-500">{{ tareas.length }}</span>
+      <span class="text-gray-600">Total</span>
     </div>
   </div>
 
-  <button class="btn-add" (click)="agregarTarea()">➕ Agregar Tarea</button>
+  <button class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 mb-6" (click)="agregarTarea()">➕ Agregar Tarea</button>
 
-  <div class="categorias">
+  <div class="flex flex-wrap gap-2 mb-6">
     @for (categoria of categorias; track categoria) {
-      <button 
-        class="btn-categoria"
-        [class.active]="categoriaSeleccionada === categoria"
-        (click)="cambiarCategoria(categoria)">
-        {{ categoria }}
-      </button>
+      <button (click)="cambiarCategoria(categoria)" [ngClass]="{ 'bg-pink-300 text-white': categoriaSeleccionada === categoria }" class="px-3 py-1 rounded-full border">{{ categoria }}</button>
     }
   </div>
 
-  <div class="tareas-lista">
+  <div class="space-y-3">
     @for (tarea of tareasFiltradas; track tarea.id) {
-      <div class="tarea-card" [class.completada]="tarea.completada" [class]="'prioridad-' + tarea.prioridad">
-        <div class="tarea-checkbox">
-          <input 
-            type="checkbox" 
-            [checked]="tarea.completada"
-            (change)="toggleCompletada(tarea)"
-            [id]="'tarea-' + tarea.id">
-          <label [for]="'tarea-' + tarea.id"></label>
-        </div>
-
-        <div class="tarea-info">
-          <h3 [class.tachado]="tarea.completada">{{ tarea.titulo }}</h3>
-          <div class="tarea-meta">
-            <span class="categoria-badge">{{ tarea.categoria }}</span>
-            <span class="prioridad-badge">{{ tarea.prioridad }}</span>
+      <div class="flex items-center justify-between bg-white p-4 rounded-lg shadow" [ngClass]="{ 'opacity-60 line-through': tarea.completada }">
+        <div class="flex items-center gap-4">
+          <input type="checkbox" [checked]="tarea.completada" (change)="toggleCompletada(tarea)" [id]="'tarea-' + tarea.id" class="w-5 h-5" />
+          <div>
+            <h3 class="font-semibold">{{ tarea.titulo }}</h3>
+            <div class="text-sm text-gray-500"> <span class="mr-2">{{ tarea.categoria }}</span> <span class="bg-gray-100 px-2 py-0.5 rounded text-xs">Prioridad: {{ tarea.prioridad }}</span></div>
           </div>
         </div>
-
-        <button class="btn-delete" (click)="eliminarTarea(tarea.id)">🗑️</button>
+        <button class="text-red-500" (click)="eliminarTarea(tarea.id)">🗑️</button>
       </div>
     } @empty {
-      <div class="empty-state">
-        <p>No hay tareas en esta categoría</p>
-      </div>
+      <div class="text-center py-8 text-gray-500">No hay tareas en esta categoría</div>
     }
   </div>
 </div>
