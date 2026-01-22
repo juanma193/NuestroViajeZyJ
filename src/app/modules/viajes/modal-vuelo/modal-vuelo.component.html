@@ -1,0 +1,134 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" (click)="onCerrar()">
+  <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl" (click)="$event.stopPropagation()">
+    <div class="p-6">
+      <h2 class="text-2xl font-bold text-pink-600 mb-4">{{ vuelo ? 'Editar' : 'Agregar' }} Vuelo ✈️</h2>
+
+      <div class="space-y-4">
+        <!-- Aerolínea y número de vuelo -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Aerolínea</label>
+            <input
+              type="text"
+              [(ngModel)]="formulario.aerolinea"
+              placeholder="Ej: Iberia"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Número de vuelo</label>
+            <input
+              type="text"
+              [(ngModel)]="formulario.numero_vuelo"
+              placeholder="Ej: IB3456"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            />
+          </div>
+        </div>
+
+        <!-- Origen y destino -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Origen *</label>
+            <input
+              type="text"
+              [(ngModel)]="formulario.origen"
+              placeholder="Ej: Madrid (MAD)"
+              required
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Destino *</label>
+            <input
+              type="text"
+              [(ngModel)]="formulario.destino"
+              placeholder="Ej: París (CDG)"
+              required
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            />
+          </div>
+        </div>
+
+        <!-- Fecha y hora de salida -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de salida</label>
+            <input
+              type="date"
+              [(ngModel)]="formulario.fecha_salida"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Hora de salida</label>
+            <input
+              type="time"
+              [(ngModel)]="formulario.hora_salida"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            />
+          </div>
+        </div>
+
+        <!-- Fecha y hora de llegada -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de llegada</label>
+            <input
+              type="date"
+              [(ngModel)]="formulario.fecha_llegada"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Hora de llegada</label>
+            <input
+              type="time"
+              [(ngModel)]="formulario.hora_llegada"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            />
+          </div>
+        </div>
+
+        <!-- Precio -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
+          <input
+            type="number"
+            [(ngModel)]="formulario.precio"
+            placeholder="Ej: 150"
+            step="0.01"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+          />
+        </div>
+
+        <!-- Notas -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Notas</label>
+          <textarea
+            [(ngModel)]="formulario.notas"
+            placeholder="Información adicional..."
+            rows="3"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-3 mt-6">
+        <button
+          (click)="onGuardar()"
+          class="flex-1 bg-gradient-to-br from-pink-400 to-pink-600 text-white py-2 rounded-md hover:from-pink-500 hover:to-pink-700 transition"
+        >
+          Guardar
+        </button>
+        <button
+          (click)="onCerrar()"
+          class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

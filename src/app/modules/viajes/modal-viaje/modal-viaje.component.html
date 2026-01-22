@@ -1,7 +1,7 @@
 <div class="fixed inset-0 bg-black/50 flex items-center justify-center p-4" (click)="onCerrar()">
   <div class="bg-white w-full max-w-lg rounded-xl shadow-2xl overflow-hidden" (click)="$event.stopPropagation()">
     <div class="flex items-center justify-between px-6 py-4 border-b">
-      <h2 class="text-xl font-bold">✈️ Nuevo Viaje</h2>
+      <h2 class="text-xl font-bold">{{ viajeEditar ? '✏️ Editar Viaje' : '✈️ Nuevo Viaje' }}</h2>
       <button class="text-gray-500 hover:text-gray-700" (click)="onCerrar()">✕</button>
     </div>
 

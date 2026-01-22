@@ -4,7 +4,12 @@
   <div class="relative max-w-5xl mx-auto p-6">
     <h1 class="text-2xl font-bold text-pink-600">🌍 Sección de Viajes</h1>
     <p class="text-gray-600 mb-6">Planifica y guarda todos tus viajes juntos</p>
-    <button class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 mb-6" (click)="abrirModal()">➕ Agregar Viaje</button>
+    <button 
+      class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 mb-6 disabled:opacity-50 disabled:cursor-not-allowed" 
+      (click)="abrirModal()"
+      [disabled]="cargando">
+      ➕ Agregar Viaje
+    </button>
 
     <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
       <div class="flex flex-col items-center gap-4">
@@ -23,21 +28,197 @@
 
       <div class="grid gap-4" *ngIf="!cargando">
         <ng-container *ngFor="let viaje of viajes">
-          <div class="bg-white rounded-xl p-4 shadow flex flex-col border-2 border-pink-200" [ngClass]="{ 'opacity-80': viaje.estado }">
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="text-lg font-semibold">{{ viaje.nombre }}</h3>
-              <button class="text-red-500" (click)="abrirModalConfirm(viaje.id, viaje.nombre)">🗑️</button>
+          <div class="bg-white rounded-xl shadow border-2 border-pink-200 transition-all duration-300" [ngClass]="{ 'opacity-80': viaje.estado }">
+            <!-- Encabezado de la tarjeta -->
+            <div class="p-4 cursor-pointer hover:bg-gray-50" (click)="toggleExpansion(viaje.id)">
+              <div class="flex justify-between items-start mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xl transition-transform duration-300" [ngClass]="{ 'rotate-90': estaExpandido(viaje.id) }">▶</span>
+                  <h3 class="text-lg font-semibold">{{ viaje.nombre }}</h3>
+                </div>
+                <div class="flex gap-2">
+                  <button class="text-blue-500 hover:text-blue-700" (click)="$event.stopPropagation(); abrirModalEditar(viaje)" title="Editar viaje">✏️</button>
+                  <button class="text-red-500 hover:text-red-700" (click)="$event.stopPropagation(); abrirModalConfirm(viaje.id, viaje.nombre)" title="Eliminar viaje">🗑️</button>
+                </div>
+              </div>
+
+              <div class="text-sm text-gray-600 ml-8">
+                <p class="mb-1">📅 {{ viaje.fecha_desde }} {{ viaje.fecha_hasta ? ' al ' + viaje.fecha_hasta : '' }}</p>
+                <p>{{ viaje.descripcion }}</p>
+              </div>
+
+              <div class="mt-3 ml-8">
+                <button 
+                  class="px-3 py-2 rounded-md border text-pink-600 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed" 
+                  (click)="$event.stopPropagation(); toggleEstado(viaje)"
+                  [disabled]="cargando">
+                  {{ viaje.estado ? '✅ Realizado' : '⏳ Pendiente' }}
+                </button>
+              </div>
             </div>
 
-            <div class="text-sm text-gray-600 mb-4">
-              <p class="mb-1">📅 {{ viaje.fecha_desde }} {{ viaje.fecha_hasta ? ' al ' + viaje.fecha_hasta : '' }}</p>
-              <p>{{ viaje.descripcion }}</p>
-            </div>
+            <!-- Contenido expandible -->
+            <div *ngIf="estaExpandido(viaje.id)" class="border-t border-pink-200 p-4 bg-gray-50">
+              <!-- Sección 1: Vuelos y Alojamientos -->
+              <div class="mb-6">
+                <h4 class="text-md font-semibold text-pink-600 mb-3 flex items-center gap-2">
+                  <span>✈️</span>
+                  <span>Vuelos y Alojamientos</span>
+                </h4>
+                <div class="bg-white rounded-lg p-4 border border-gray-200">
+                  <!-- Vuelos -->
+                  <div class="mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-sm font-medium text-gray-700">✈️ Vuelos</span>
+                      <button 
+                        class="text-xs text-pink-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed" 
+                        (click)="abrirModalVuelo(viaje.id!)"
+                        [disabled]="cargando">
+                        + Agregar vuelo
+                      </button>
+                    </div>
+                    <div *ngIf="vuelosPorViaje.get(viaje.id!)?.length === 0" class="text-sm text-gray-500 ml-6">
+                      No hay vuelos registrados
+                    </div>
+                    <div *ngFor="let vuelo of vuelosPorViaje.get(viaje.id!)" class="ml-6 mb-2 p-3 bg-blue-50 rounded border border-blue-200">
+                      <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                          <p class="text-sm font-semibold text-blue-700">{{ vuelo.origen }} → {{ vuelo.destino }}</p>
+                          <p class="text-xs text-gray-700 mt-1" *ngIf="vuelo.aerolinea || vuelo.numero_vuelo">
+                            <span class="font-medium">Aerolínea:</span> {{ vuelo.aerolinea }} {{ vuelo.numero_vuelo }}
+                          </p>
+                          <div class="grid grid-cols-2 gap-2 mt-2">
+                            <div *ngIf="vuelo.fecha_salida">
+                              <p class="text-xs text-gray-600"><span class="font-medium">Salida:</span></p>
+                              <p class="text-xs text-gray-700">📅 {{ vuelo.fecha_salida }}</p>
+                              <p class="text-xs text-gray-700" *ngIf="vuelo.hora_salida">🕐 {{ vuelo.hora_salida }}</p>
+                            </div>
+                            <div *ngIf="vuelo.fecha_llegada">
+                              <p class="text-xs text-gray-600"><span class="font-medium">Llegada:</span></p>
+                              <p class="text-xs text-gray-700">📅 {{ vuelo.fecha_llegada }}</p>
+                              <p class="text-xs text-gray-700" *ngIf="vuelo.hora_llegada">🕐 {{ vuelo.hora_llegada }}</p>
+                            </div>
+                          </div>
+                          <p class="text-xs text-gray-700 mt-2" *ngIf="vuelo.precio">
+                            <span class="font-medium">Precio:</span> {{ vuelo.precio }}$
+                          </p>
+                          <p class="text-xs text-gray-600 mt-1 italic" *ngIf="vuelo.notas">{{ vuelo.notas }}</p>
+                        </div>
+                        <div class="flex gap-1 ml-2">
+                          <button class="text-blue-500 text-sm hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" (click)="abrirModalEditarVuelo(vuelo)" [disabled]="cargando" title="Editar">✏️</button>
+                          <button class="text-red-500 text-sm hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed" (click)="eliminarVuelo(vuelo.id!)" [disabled]="cargando" title="Eliminar">🗑️</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-            <div class="mt-auto">
-              <button class="px-3 py-2 rounded-md border text-pink-600" (click)="toggleEstado(viaje)">
-                {{ viaje.estado ? '✅ Realizado' : '⏳ Pendiente' }}
-              </button>
+                  <!-- Alojamientos -->
+                  <div class="border-t border-gray-200 pt-3">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-sm font-medium text-gray-700">🏨 Alojamientos</span>
+                      <button 
+                        class="text-xs text-pink-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed" 
+                        (click)="abrirModalAlojamiento(viaje.id!)"
+                        [disabled]="cargando">
+                        + Agregar alojamiento
+                      </button>
+                    </div>
+                    <div *ngIf="alojamientosPorViaje.get(viaje.id!)?.length === 0" class="text-sm text-gray-500 ml-6">
+                      No hay alojamientos registrados
+                    </div>
+                    <div *ngFor="let alojamiento of alojamientosPorViaje.get(viaje.id!)" class="ml-6 mb-2 p-3 bg-amber-50 rounded border border-amber-200">
+                      <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                          <p class="text-sm font-semibold text-amber-700">{{ alojamiento.nombre }}</p>
+                          <p class="text-xs text-gray-700 mt-1" *ngIf="alojamiento.tipo">
+                            <span class="font-medium">Tipo:</span> {{ alojamiento.tipo }}
+                          </p>
+                          <p class="text-xs text-gray-700 mt-1" *ngIf="alojamiento.direccion">
+                            <span class="font-medium">📍</span> {{ alojamiento.direccion }}
+                          </p>
+                          <p class="text-xs text-gray-700 mt-1">
+                            <span class="font-medium">Check-in:</span> {{ alojamiento.fecha_checkin }} | 
+                            <span class="font-medium">Check-out:</span> {{ alojamiento.fecha_checkout }}
+                          </p>
+                          <p class="text-xs text-gray-700 mt-1" *ngIf="alojamiento.precio_noche">
+                            <span class="font-medium">Precio:</span> {{ alojamiento.precio_noche }}$/noche
+                          </p>
+                          <p class="text-xs text-gray-600 mt-1 italic" *ngIf="alojamiento.notas">{{ alojamiento.notas }}</p>
+                        </div>
+                        <div class="flex gap-1 ml-2">
+                          <button class="text-amber-600 text-sm hover:text-amber-700 disabled:opacity-50 disabled:cursor-not-allowed" (click)="abrirModalEditarAlojamiento(alojamiento)" [disabled]="cargando" title="Editar">✏️</button>
+                          <button class="text-red-500 text-sm hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed" (click)="eliminarAlojamiento(alojamiento.id!)" [disabled]="cargando" title="Eliminar">🗑️</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sección 2: Actividades -->
+              <div>
+                <h4 class="text-md font-semibold text-pink-600 mb-3 flex items-center gap-2">
+                  <span>🎯</span>
+                  <span>Actividades</span>
+                </h4>
+                <div class="bg-white rounded-lg p-4 border border-gray-200">
+                  <div class="flex items-center justify-between mb-3">
+                    <button 
+                      class="text-xs text-pink-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed" 
+                      (click)="abrirModalActividad(viaje.id!)"
+                      [disabled]="cargando">
+                      + Agregar actividad
+                    </button>
+                  </div>
+                  <div *ngIf="actividadesPorViaje.get(viaje.id!)?.length === 0" class="text-sm text-gray-500">
+                    No hay actividades planificadas
+                  </div>
+                  <div class="space-y-2">
+                    <div *ngFor="let actividad of actividadesPorViaje.get(viaje.id!)" 
+                         class="p-3 rounded border"
+                         [ngClass]="actividad.completada ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'">
+                      <div class="flex justify-between items-start">
+                        <div class="flex items-start gap-2 flex-1">
+                          <input 
+                            type="checkbox" 
+                            [checked]="actividad.completada"
+                            (change)="toggleActividadCompletada(actividad)"
+                            [disabled]="cargando"
+                            class="mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                          />
+                          <div class="flex-1">
+                            <p class="text-sm font-medium" [ngClass]="actividad.completada ? 'line-through text-gray-500' : ''">
+                              {{ actividad.nombre }}
+                            </p>
+                            <p class="text-xs text-gray-600 mt-1" *ngIf="actividad.descripcion">{{ actividad.descripcion }}</p>
+                            <p class="text-xs text-gray-600 mt-1" *ngIf="actividad.fecha">
+                              📅 {{ actividad.fecha }} {{ actividad.hora ? '🕐 ' + actividad.hora : '' }}
+                            </p>
+                            <p class="text-xs text-gray-600 mt-1" *ngIf="actividad.ubicacion">📍 {{ actividad.ubicacion }}</p>
+                            <div class="flex gap-2 mt-1">
+                              <span *ngIf="actividad.prioridad" class="text-xs px-2 py-0.5 rounded" 
+                                    [ngClass]="{
+                                      'bg-red-100 text-red-700': actividad.prioridad === 'Alta',
+                                      'bg-yellow-100 text-yellow-700': actividad.prioridad === 'Media',
+                                      'bg-blue-100 text-blue-700': actividad.prioridad === 'Baja'
+                                    }">
+                                {{ actividad.prioridad }}
+                              </span>
+                              <span *ngIf="actividad.precio" class="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 rounded">
+                                {{ actividad.precio }}$
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex gap-1 ml-2">
+                          <button class="text-green-600 text-sm hover:text-green-700 disabled:opacity-50 disabled:cursor-not-allowed" (click)="abrirModalEditarActividad(actividad)" [disabled]="cargando" title="Editar">✏️</button>
+                          <button class="text-red-500 text-sm hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed" (click)="eliminarActividad(actividad.id!)" [disabled]="cargando" title="Eliminar">🗑️</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </ng-container>
@@ -46,8 +227,10 @@
 
     <app-modal-viaje
       *ngIf="mostrarModal"
+      [viajeEditar]="viajeEnEdicion"
       (cerrar)="cerrarModal()"
-      (guardar)="agregarViaje($event)">
+      (guardar)="agregarViaje($event)"
+      (actualizar)="actualizarViaje($event)">
     </app-modal-viaje>
 
     <app-modal-confirm
@@ -57,5 +240,56 @@
       (cancelar)="cerrarModalConfirm()"
       (confirmar)="confirmarEliminar()">
     </app-modal-confirm>
+
+    <app-modal-confirm
+      *ngIf="mostrarModalConfirmVuelo"
+      [titulo]="'Eliminar vuelo'"
+      [mensaje]="'¿Estás seguro de eliminar este vuelo?'"
+      (cancelar)="cerrarModalConfirmVuelo()"
+      (confirmar)="confirmarEliminarVuelo()">
+    </app-modal-confirm>
+
+    <app-modal-confirm
+      *ngIf="mostrarModalConfirmAlojamiento"
+      [titulo]="'Eliminar alojamiento'"
+      [mensaje]="'¿Estás seguro de eliminar este alojamiento?'"
+      (cancelar)="cerrarModalConfirmAlojamiento()"
+      (confirmar)="confirmarEliminarAlojamiento()">
+    </app-modal-confirm>
+
+    <app-modal-confirm
+      *ngIf="mostrarModalConfirmActividad"
+      [titulo]="'Eliminar actividad'"
+      [mensaje]="'¿Estás seguro de eliminar esta actividad?'"
+      (cancelar)="cerrarModalConfirmActividad()"
+      (confirmar)="confirmarEliminarActividad()">
+    </app-modal-confirm>
+
+    <app-modal-vuelo
+      *ngIf="mostrarModalVuelo && viajeIdActual"
+      [viajeId]="viajeIdActual"
+      [vuelo]="vueloEnEdicion"
+      (cerrar)="cerrarModalVuelo()"
+      (guardar)="agregarVuelo($event)"
+      (actualizar)="actualizarVuelo($event)">
+    </app-modal-vuelo>
+
+    <app-modal-alojamiento
+      *ngIf="mostrarModalAlojamiento && viajeIdActual"
+      [viajeId]="viajeIdActual"
+      [alojamiento]="alojamientoEnEdicion"
+      (cerrar)="cerrarModalAlojamiento()"
+      (guardar)="agregarAlojamiento($event)"
+      (actualizar)="actualizarAlojamiento($event)">
+    </app-modal-alojamiento>
+
+    <app-modal-actividad
+      *ngIf="mostrarModalActividad && viajeIdActual"
+      [viajeId]="viajeIdActual"
+      [actividad]="actividadEnEdicion"
+      (cerrar)="cerrarModalActividad()"
+      (guardar)="agregarActividad($event)"
+      (actualizar)="actualizarActividad($event)">
+    </app-modal-actividad>
   </div>
 </div>
