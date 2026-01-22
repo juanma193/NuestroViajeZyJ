@@ -19,6 +19,7 @@ export class PeliculasComponent implements OnInit {
   mostrarModalConfirm = false;
   peliculaAEliminarId?: number;
   peliculaAEliminarNombre = '';
+  peliculaEnEdicion?: Pelicula;
 
   constructor(
     private peliculasService: PeliculasService,
@@ -55,11 +56,18 @@ export class PeliculasComponent implements OnInit {
   }
 
   abrirModal() {
+    this.peliculaEnEdicion = undefined;
+    this.mostrarModal = true;
+  }
+
+  abrirModalEditar(pelicula: Pelicula) {
+    this.peliculaEnEdicion = pelicula;
     this.mostrarModal = true;
   }
 
   cerrarModal() {
     this.mostrarModal = false;
+    this.peliculaEnEdicion = undefined;
   }
 
   async agregarPelicula(pelicula: Omit<Pelicula, 'id' | 'created_at'>) {
@@ -81,7 +89,28 @@ export class PeliculasComponent implements OnInit {
       }
     } catch (error) {
       console.error('Error al guardar película:', error);
-      this.toastService.showError('Error', 'Error al guardar la película. Por favor, intenta de nuevo.');
+      this.toastService.showError('Error', 'Error inesperado al guardar la película.');
+    } finally {
+      this.cargando = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  async actualizarPelicula(data: {id: number, pelicula: Partial<Pelicula>}) {
+    try {
+      this.cargando = true;
+      this.cdr.detectChanges();
+      const exito = await this.peliculasService.actualizarPelicula(data.id, data.pelicula);
+      if (exito) {
+        this.cerrarModal();
+        await this.cargarPeliculas();
+        this.toastService.showSuccess('Éxito', 'Película actualizada correctamente');
+      } else {
+        this.toastService.showError('Error', 'No se pudo actualizar la película');
+      }
+    } catch (error) {
+      console.error('Error actualizando película:', error);
+      this.toastService.showError('Error', 'Error al actualizar la película');
     } finally {
       this.cargando = false;
       this.cdr.detectChanges();
