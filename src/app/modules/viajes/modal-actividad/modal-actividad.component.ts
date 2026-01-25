@@ -16,6 +16,8 @@ export class ModalActividadComponent {
   @Output() guardar = new EventEmitter<Omit<ActividadViaje, 'id' | 'created_at'>>();
   @Output() actualizar = new EventEmitter<{id: number, actividad: Partial<ActividadViaje>}>();
 
+  mostrarErrores = false;
+
   formulario: Omit<ActividadViaje, 'id' | 'created_at'> = {
     viaje_id: 0,
     nombre: '',
@@ -38,14 +40,22 @@ export class ModalActividadComponent {
   }
 
   onGuardar() {
-    if (this.formulario.nombre) {
-      if (this.actividad?.id) {
-        // Modo edición
-        this.actualizar.emit({ id: this.actividad.id, actividad: { ...this.formulario } });
-      } else {
-        // Modo creación
-        this.guardar.emit(this.formulario);
-      }
+    this.mostrarErrores = true;
+
+    const nombreValido = !!this.formulario.nombre?.trim();
+    const fechaValida = !!this.formulario.fecha?.trim();
+    const horaValida = !!this.formulario.hora?.trim();
+
+    if (!nombreValido || !fechaValida || !horaValida) {
+      return;
+    }
+
+    if (this.actividad?.id) {
+      // Modo edición
+      this.actualizar.emit({ id: this.actividad.id, actividad: { ...this.formulario } });
+    } else {
+      // Modo creación
+      this.guardar.emit(this.formulario);
     }
   }
 

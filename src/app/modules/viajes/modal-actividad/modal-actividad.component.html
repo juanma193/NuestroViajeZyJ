@@ -10,10 +10,12 @@
           <input
             type="text"
             [(ngModel)]="formulario.nombre"
+            name="nombre"
             placeholder="Ej: Visita a la Torre Eiffel"
             required
             class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
           />
+          <p *ngIf="mostrarErrores && !formulario.nombre?.trim()" class="text-sm text-red-600 mt-1">El nombre es obligatorio.</p>
         </div>
 
         <!-- Descripción -->
@@ -30,20 +32,26 @@
         <!-- Fecha y hora -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha*</label>
             <input
               type="date"
               [(ngModel)]="formulario.fecha"
+              name="fecha"
+              required
               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
             />
+            <p *ngIf="mostrarErrores && !formulario.fecha?.trim()" class="text-sm text-red-600 mt-1">La fecha es obligatoria.</p>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Hora*</label>
             <input
               type="time"
               [(ngModel)]="formulario.hora"
+              name="hora"
+              required
               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
             />
+            <p *ngIf="mostrarErrores && !formulario.hora?.trim()" class="text-sm text-red-600 mt-1">La hora es obligatoria.</p>
           </div>
         </div>
 
