@@ -38,6 +38,7 @@
               [(ngModel)]="formulario.fecha"
               name="fecha"
               required
+              [min]="fechaMinima"
               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
             />
             <p *ngIf="mostrarErrores && !formulario.fecha?.trim()" class="text-sm text-red-600 mt-1">La fecha es obligatoria.</p>

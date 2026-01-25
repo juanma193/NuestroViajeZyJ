@@ -12,6 +12,7 @@ import { ActividadViaje } from '../../../core/models/actividad-viaje.model';
 export class ModalActividadComponent {
   @Input() viajeId!: number;
   @Input() actividad?: ActividadViaje;
+  @Input() fechaInicioViaje?: string;
   @Output() cerrar = new EventEmitter<void>();
   @Output() guardar = new EventEmitter<Omit<ActividadViaje, 'id' | 'created_at'>>();
   @Output() actualizar = new EventEmitter<{id: number, actividad: Partial<ActividadViaje>}>();
@@ -31,6 +32,13 @@ export class ModalActividadComponent {
   };
 
   prioridades = ['Alta', 'Media', 'Baja'];
+
+  get fechaMinima(): string | undefined {
+    if (!this.fechaInicioViaje) return undefined;
+    const [anio, mes] = this.fechaInicioViaje.split('-');
+    if (!anio || !mes) return undefined;
+    return `${anio}-${mes}-01`;
+  }
 
   ngOnInit() {
     this.formulario.viaje_id = this.viajeId;

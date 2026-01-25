@@ -44,6 +44,7 @@ export class ViajesComponent implements OnInit {
   vueloEnEdicion?: Vuelo;
   alojamientoEnEdicion?: Alojamiento;
   actividadEnEdicion?: ActividadViaje;
+  fechaInicioViajeActual?: string;
 
   // Modales de confirmación para eliminar
   mostrarModalConfirmVuelo = false;
@@ -70,7 +71,17 @@ export class ViajesComponent implements OnInit {
     try {
       this.cargando = true;
       this.cdr.detectChanges();
-      this.viajes = await this.viajesService.obtenerViajes();
+      const viajes = await this.viajesService.obtenerViajes();
+      this.viajes = viajes.sort((a, b) => {
+        const aPendiente = a.estado === false ? 0 : 1;
+        const bPendiente = b.estado === false ? 0 : 1;
+        if (aPendiente !== bPendiente) {
+          return aPendiente - bPendiente;
+        }
+        const aKey = a.fecha_desde ?? '';
+        const bKey = b.fecha_desde ?? '';
+        return aKey.localeCompare(bKey);
+      });
     } catch (error) {
       console.error('Error cargando viajes:', error);
       this.viajes = [];
@@ -427,12 +438,14 @@ export class ViajesComponent implements OnInit {
   abrirModalActividad(viajeId: number) {
     this.viajeIdActual = viajeId;
     this.actividadEnEdicion = undefined;
+    this.fechaInicioViajeActual = this.obtenerFechaInicioViaje(viajeId);
     this.mostrarModalActividad = true;
   }
 
   abrirModalEditarActividad(actividad: ActividadViaje) {
     this.viajeIdActual = actividad.viaje_id;
     this.actividadEnEdicion = actividad;
+    this.fechaInicioViajeActual = this.obtenerFechaInicioViaje(actividad.viaje_id);
     this.mostrarModalActividad = true;
   }
 
@@ -440,6 +453,7 @@ export class ViajesComponent implements OnInit {
     this.mostrarModalActividad = false;
     this.viajeIdActual = undefined;
     this.actividadEnEdicion = undefined;
+    this.fechaInicioViajeActual = undefined;
   }
 
   async agregarActividad(actividad: Omit<ActividadViaje, 'id' | 'created_at'>) {
@@ -522,6 +536,10 @@ export class ViajesComponent implements OnInit {
         this.cdr.detectChanges();
       }
     }
+  }
+
+  private obtenerFechaInicioViaje(viajeId: number): string | undefined {
+    return this.viajes.find((viaje) => viaje.id === viajeId)?.fecha_desde;
   }
 
   async toggleActividadCompletada(actividad: ActividadViaje) {

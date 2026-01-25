@@ -286,6 +286,7 @@
     <app-modal-actividad
       *ngIf="mostrarModalActividad && viajeIdActual"
       [viajeId]="viajeIdActual"
+      [fechaInicioViaje]="fechaInicioViajeActual"
       [actividad]="actividadEnEdicion"
       (cerrar)="cerrarModalActividad()"
       (guardar)="agregarActividad($event)"
