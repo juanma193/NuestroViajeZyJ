@@ -1,10 +1,42 @@
-<div class="max-w-5xl mx-auto p-6">
-  <h2 class="text-2xl font-bold text-pink-600">🏠 Bienvenidos a Nuestro Espacio</h2>
-  <p class="text-gray-600 mb-6">Este es nuestro rincón especial donde guardamos todos nuestros recuerdos y planes futuros. Explora las diferentes secciones usando el menú superior.</p>
+<div class="max-w-6xl mx-auto p-6">
+  <section class="relative overflow-hidden rounded-3xl shadow-xl" aria-label="Hero romántico">
+    <img
+      class="w-full h-64 sm:h-80 md:h-96 object-cover"
+      [src]="photos[0]?.src"
+      [alt]="photos[0]?.alt || 'Foto destacada'"
+      loading="lazy"
+      decoding="async"
+    />
+    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-transparent"></div>
+    <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+      <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white drop-shadow">Nuestros recuerdos favoritos, un día a la vez 💕</h2>
+      <p class="mt-3 text-white/90">{{ fraseAleatoria }}</p>
+    </div>
+  </section>
 
-  <section class="grid grid-cols-2 sm:grid-cols-4 gap-3" aria-label="Mural de fotos">
-    <figure class="aspect-square overflow-hidden rounded-lg" *ngFor="let photo of photos">
-      <img class="w-full h-full object-cover" [src]="photo.src" [alt]="photo.alt" loading="lazy" decoding="async" />
-    </figure>
+  <div class="flex items-center gap-3 my-8" aria-hidden="true">
+    <div class="h-px flex-1 bg-gradient-to-r from-transparent via-pink-300 to-transparent"></div>
+    <span class="text-pink-400">❤</span>
+    <div class="h-px flex-1 bg-gradient-to-r from-transparent via-pink-300 to-transparent"></div>
+  </div>
+
+  <section aria-label="Mural de fotos">
+    <h3 class="text-xl font-semibold text-pink-600 mb-4">Momentos en imágenes</h3>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      <figure class="group relative aspect-square overflow-hidden rounded-xl" *ngFor="let photo of photos">
+        <img
+          class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          [src]="photo.src"
+          [alt]="photo.alt"
+          loading="lazy"
+          decoding="async"
+        />
+        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300"></div>
+        <figcaption class="absolute bottom-2 left-2 right-2 text-xs text-white/0 group-hover:text-white/90 transition-colors duration-300 drop-shadow">
+          {{ photo.caption }}
+        </figcaption>
+        <div class="absolute inset-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)]"></div>
+      </figure>
+    </div>
   </section>
 </div>
