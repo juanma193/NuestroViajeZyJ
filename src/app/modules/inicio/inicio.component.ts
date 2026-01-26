@@ -9,6 +9,7 @@ import { fotosInicio } from './fotos-inicio-list';
   templateUrl: './inicio.component.html',
 })
 export class InicioComponent {
+  currentPhotoIndex = 0;
   readonly frases = ['Siempre vos', 'Mi lugar seguro', 'Con vos todo', 'Un día a la vez', 'Nosotros 💖'];
   readonly fraseAleatoria = this.frases[Math.floor(Math.random() * this.frases.length)];
 
@@ -43,4 +44,22 @@ export class InicioComponent {
     alt: `Recuerdo ${index + 1}`,
     caption: this.captions[index % this.captions.length],
   }));
+
+  get currentPhoto(): { src: string; alt: string; caption: string } | undefined {
+    return this.photos.length ? this.photos[this.currentPhotoIndex] : undefined;
+  }
+
+  nextPhoto() {
+    if (!this.photos.length) {
+      return;
+    }
+    this.currentPhotoIndex = (this.currentPhotoIndex + 1) % this.photos.length;
+  }
+
+  prevPhoto() {
+    if (!this.photos.length) {
+      return;
+    }
+    this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.photos.length) % this.photos.length;
+  }
 }
