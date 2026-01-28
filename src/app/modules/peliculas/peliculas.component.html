@@ -17,6 +17,10 @@
 
   <div *ngIf="!cargando">
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 max-w-5xl mx-auto">
+      <div class="bg-white border rounded-xl shadow-lg p-5 text-center border-l-4 border-pink-500">
+        <span class="block text-3xl font-bold text-pink-500">{{ peliculas.length }}</span>
+        <span class="text-gray-600">Total</span>
+      </div>
       <div class="bg-white border rounded-xl shadow-lg p-5 text-center border-l-4 border-orange-400">
         <span class="block text-3xl font-bold text-pink-500">{{ peliculasPendientes }}</span>
         <span class="text-gray-600">Por Ver</span>
@@ -24,10 +28,6 @@
       <div class="bg-white border rounded-xl shadow-lg p-5 text-center border-l-4 border-pink-300">
         <span class="block text-3xl font-bold text-pink-500">{{ peliculasVistas }}</span>
         <span class="text-gray-600">Vistos</span>
-      </div>
-      <div class="bg-white border rounded-xl shadow-lg p-5 text-center border-l-4 border-pink-500">
-        <span class="block text-3xl font-bold text-pink-500">{{ peliculas.length }}</span>
-        <span class="text-gray-600">Total</span>
       </div>
     </div>
 
