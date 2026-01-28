@@ -1,0 +1,47 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" (click)="onCerrar()">
+  <div class="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl" (click)="$event.stopPropagation()">
+    <div class="p-6">
+      <h2 class="text-2xl font-bold text-pink-600 mb-4">{{ cosa ? 'Editar' : 'Agregar' }} Cosa para llevar 🎒</h2>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+          <input
+            type="text"
+            [(ngModel)]="formulario.nombre"
+            name="nombre"
+            placeholder="Ej: Pasaporte"
+            required
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+          />
+          <p *ngIf="mostrarErrores && !formulario.nombre.trim()" class="text-sm text-red-600 mt-1">El nombre es obligatorio.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input
+            type="checkbox"
+            [(ngModel)]="formulario.completado"
+            id="completado"
+            class="w-4 h-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+          />
+          <label for="completado" class="text-sm font-medium text-gray-700">Marcado como listo</label>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-6">
+        <button
+          (click)="onGuardar()"
+          class="flex-1 bg-gradient-to-br from-pink-400 to-pink-600 text-white py-2 rounded-md hover:from-pink-500 hover:to-pink-700 transition"
+        >
+          Guardar
+        </button>
+        <button
+          (click)="onCerrar()"
+          class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

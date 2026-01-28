@@ -61,18 +61,21 @@
             <div *ngIf="estaExpandido(viaje.id)" class="border-t border-pink-200 p-4 bg-gray-50">
               <!-- Sección 1: Vuelos y Alojamientos -->
               <div class="mb-6">
-                <h4 class="text-md font-semibold text-pink-600 mb-3 flex items-center gap-2">
-                  <span>✈️</span>
-                  <span>Vuelos y Alojamientos</span>
-                </h4>
-                <div class="bg-white rounded-lg p-4 border border-gray-200">
+                <div class="cursor-pointer" (click)="toggleVuelosAlojamientosExpansion(viaje.id)">
+                  <h4 class="text-md font-semibold text-pink-600 mb-3 flex items-center gap-2">
+                    <span class="text-sm transition-transform duration-300" [ngClass]="{ 'rotate-90': estaVuelosAlojamientosExpandido(viaje.id) }">▶</span>
+                    <span>✈️</span>
+                    <span>Vuelos y Alojamientos</span>
+                  </h4>
+                </div>
+                <div *ngIf="estaVuelosAlojamientosExpandido(viaje.id)" class="bg-white rounded-lg p-4 border border-gray-200">
                   <!-- Vuelos -->
                   <div class="mb-4">
                     <div class="flex items-center justify-between mb-2">
                       <span class="text-sm font-medium text-gray-700">✈️ Vuelos</span>
                       <button 
                         class="text-xs text-pink-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed" 
-                        (click)="abrirModalVuelo(viaje.id!)"
+                        (click)="$event.stopPropagation(); abrirModalVuelo(viaje.id!)"
                         [disabled]="cargando">
                         + Agregar vuelo
                       </button>
@@ -118,7 +121,7 @@
                       <span class="text-sm font-medium text-gray-700">🏨 Alojamientos</span>
                       <button 
                         class="text-xs text-pink-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed" 
-                        (click)="abrirModalAlojamiento(viaje.id!)"
+                        (click)="$event.stopPropagation(); abrirModalAlojamiento(viaje.id!)"
                         [disabled]="cargando">
                         + Agregar alojamiento
                       </button>
@@ -157,15 +160,18 @@
 
               <!-- Sección 2: Actividades -->
               <div>
-                <h4 class="text-md font-semibold text-pink-600 mb-3 flex items-center gap-2">
-                  <span>🎯</span>
-                  <span>Actividades</span>
-                </h4>
-                <div class="bg-white rounded-lg p-4 border border-gray-200">
+                <div class="cursor-pointer" (click)="toggleActividadesExpansion(viaje.id)">
+                  <h4 class="text-md font-semibold text-pink-600 mb-3 flex items-center gap-2">
+                    <span class="text-sm transition-transform duration-300" [ngClass]="{ 'rotate-90': estaActividadesExpandido(viaje.id) }">▶</span>
+                    <span>🎯</span>
+                    <span>Actividades</span>
+                  </h4>
+                </div>
+                <div *ngIf="estaActividadesExpandido(viaje.id)" class="bg-white rounded-lg p-4 border border-gray-200">
                   <div class="flex items-center justify-between mb-3">
                     <button 
                       class="text-xs text-pink-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed" 
-                      (click)="abrirModalActividad(viaje.id!)"
+                      (click)="$event.stopPropagation(); abrirModalActividad(viaje.id!)"
                       [disabled]="cargando">
                       + Agregar actividad
                     </button>
@@ -219,6 +225,91 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Sección 3: Cosas para llevar -->
+              <div class="mt-6">
+                <div class="cursor-pointer" (click)="toggleCosasExpansion(viaje.id)">
+                  <h4 class="text-md font-semibold text-pink-600 mb-3 flex items-center gap-2">
+                    <span class="text-sm transition-transform duration-300" [ngClass]="{ 'rotate-90': estaCosasExpandido(viaje.id) }">▶</span>
+                    <span>🎒</span>
+                    <span>Cosas para llevar</span>
+                  </h4>
+                </div>
+                <div *ngIf="estaCosasExpandido(viaje.id)" class="bg-white rounded-lg p-4 border border-gray-200">
+                  <div class="flex items-center justify-between mb-3">
+                    <button 
+                      class="text-xs text-pink-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed" 
+                      (click)="$event.stopPropagation(); iniciarNuevaCosa(viaje.id!)"
+                      [disabled]="cargando">
+                      + Agregar cosa
+                    </button>
+                  </div>
+                  <div *ngIf="cosasCreando.has(viaje.id!)" class="mb-3 ml-1">
+                    <input
+                      type="text"
+                      [(ngModel)]="nuevoNombreCosa[viaje.id!]"
+                      (keydown.enter)="crearCosaDesdeInput(viaje.id!)"
+                      (keydown.escape)="cancelarNuevaCosa(viaje.id!)"
+                      placeholder="Escribe y presiona Enter"
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                    />
+                    <div class="mt-2 flex gap-2">
+                      <button
+                        class="text-xs text-pink-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                        (click)="crearCosaDesdeInput(viaje.id!)"
+                        [disabled]="cargando">
+                        Crear
+                      </button>
+                      <button
+                        class="text-xs text-gray-500 hover:underline"
+                        (click)="cancelarNuevaCosa(viaje.id!)">
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                  <div *ngIf="cosasPorViaje.get(viaje.id!)?.length === 0" class="text-sm text-gray-500">
+                    No hay cosas para llevar
+                  </div>
+                  <div class="space-y-2">
+                    <div *ngFor="let cosa of cosasPorViaje.get(viaje.id!)"
+                         class="p-3 rounded border"
+                         [ngClass]="cosa.completado ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'">
+                      <div class="flex justify-between items-start">
+                        <div class="flex items-start gap-2 flex-1">
+                          <input 
+                            type="checkbox" 
+                            [checked]="cosa.completado"
+                            (change)="toggleCosaCompletada(cosa)"
+                            [disabled]="cargando"
+                            class="mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                          />
+                          <div class="flex-1">
+                            <input
+                              *ngIf="cosaEditandoId === cosa.id"
+                              type="text"
+                              [(ngModel)]="cosaEditandoNombre"
+                              (keydown.enter)="$event.preventDefault(); $event.stopPropagation(); guardarEdicionCosa(cosa)"
+                              (keyup.enter)="$event.preventDefault(); guardarEdicionCosa(cosa)"
+                              (blur)="guardarEdicionCosa(cosa)"
+                              (keydown.escape)="cancelarEdicionCosa()"
+                              class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                            />
+                            <p *ngIf="cosaEditandoId !== cosa.id" class="text-sm font-medium" [ngClass]="cosa.completado ? 'line-through text-gray-500' : ''">
+                              {{ cosa.nombre }}
+                            </p>
+                          </div>
+                        </div>
+                        <div class="flex gap-1 ml-2">
+                          <button *ngIf="cosaEditandoId !== cosa.id" class="text-green-600 text-sm hover:text-green-700 disabled:opacity-50 disabled:cursor-not-allowed" (click)="iniciarEdicionCosa(cosa)" [disabled]="cargando" title="Editar">✏️</button>
+                          <button *ngIf="cosaEditandoId === cosa.id" class="text-pink-600 text-sm hover:text-pink-700 disabled:opacity-50 disabled:cursor-not-allowed" (click)="guardarEdicionCosa(cosa)" [disabled]="cargando" title="Guardar">💾</button>
+                          <button *ngIf="cosaEditandoId === cosa.id" class="text-gray-500 text-sm hover:text-gray-700" (click)="cancelarEdicionCosa()" title="Cancelar">✖️</button>
+                          <button class="text-red-500 text-sm hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed" (click)="eliminarCosa(cosa.id!)" [disabled]="cargando" title="Eliminar">🗑️</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </ng-container>
@@ -265,6 +356,14 @@
       (confirmar)="confirmarEliminarActividad()">
     </app-modal-confirm>
 
+    <app-modal-confirm
+      *ngIf="mostrarModalConfirmCosa"
+      [titulo]="'Eliminar cosa'"
+      [mensaje]="'¿Estás seguro de eliminar esta cosa?'"
+      (cancelar)="cerrarModalConfirmCosa()"
+      (confirmar)="confirmarEliminarCosa()">
+    </app-modal-confirm>
+
     <app-modal-vuelo
       *ngIf="mostrarModalVuelo && viajeIdActual"
       [viajeId]="viajeIdActual"
@@ -286,11 +385,11 @@
     <app-modal-actividad
       *ngIf="mostrarModalActividad && viajeIdActual"
       [viajeId]="viajeIdActual"
-      [fechaInicioViaje]="fechaInicioViajeActual"
       [actividad]="actividadEnEdicion"
       (cerrar)="cerrarModalActividad()"
       (guardar)="agregarActividad($event)"
       (actualizar)="actualizarActividad($event)">
     </app-modal-actividad>
+
   </div>
 </div>
