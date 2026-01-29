@@ -8,7 +8,7 @@
         </div>
 
         <button
-          class="md:hidden inline-flex items-center justify-center rounded-md p-2 text-pink-600 hover:bg-white/40"
+          class="lg:hidden inline-flex items-center justify-center rounded-md p-2 text-pink-600 hover:bg-white/40"
           (click)="toggleMenu()"
           aria-label="Abrir menú">
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -16,7 +16,7 @@
           </svg>
         </button>
 
-        <nav class="hidden md:flex gap-3">
+        <nav class="hidden lg:flex gap-3">
           <a routerLink="/inicio" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="px-3 py-2 rounded-md hover:bg-white/40">🏠 Inicio</a>
           <a routerLink="/viajes" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">🌍 Viajes</a>
           <a routerLink="/calendario" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">📅 Calendario</a>
@@ -29,7 +29,7 @@
         </nav>
       </div>
 
-      <div *ngIf="menuOpen" class="md:hidden pb-4">
+      <div *ngIf="menuOpen" class="lg:hidden pb-4">
         <nav class="flex flex-col gap-2 bg-white/60 rounded-lg p-3">
           <a (click)="closeMenu()" routerLink="/inicio" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="px-3 py-2 rounded-md hover:bg-white/40">🏠 Inicio</a>
           <a (click)="closeMenu()" routerLink="/viajes" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">🌍 Viajes</a>
