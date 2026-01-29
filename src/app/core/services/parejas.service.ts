@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from '../supabase';
+import { AuthService } from './auth.service';
+import type { Profile } from './profiles.service';
+import { defer, Observable, shareReplay } from 'rxjs';
 
 export interface ParejaMiembroInfo {
   user_id: string;
@@ -13,6 +16,11 @@ export interface ParejaInfo {
   miembros: ParejaMiembroInfo[];
 }
 
+export interface ProfileBundle {
+  profile: Profile | null;
+  pareja: ParejaInfo | null;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -21,8 +29,22 @@ export class ParejasService {
   private parejaIdPromise?: Promise<string | null>;
   private pairDetailsCache?: ParejaInfo | null;
   private pairDetailsPromise?: Promise<ParejaInfo | null>;
+  private profileBundleCache = new Map<string, Observable<ProfileBundle>>();
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(
+    private supabase: SupabaseService,
+    private authService: AuthService
+  ) {}
+
+  private async getCurrentUserId(): Promise<string | null> {
+    const currentUser = this.authService.currentUser;
+    if (currentUser?.id) {
+      return currentUser.id;
+    }
+
+    const { data } = await this.supabase.supabase.auth.getSession();
+    return data.session?.user?.id ?? null;
+  }
 
   async getParejaIdActual(): Promise<string | null> {
     return this.getMyPair();
@@ -37,16 +59,16 @@ export class ParejasService {
       return this.parejaIdPromise;
     }
     this.parejaIdPromise = (async () => {
-      const { data: userData, error: userError } = await this.supabase.supabase.auth.getUser();
-      if (userError || !userData.user) {
-        console.error('Error obteniendo usuario para pareja:', userError);
+      const userId = await this.getCurrentUserId();
+      if (!userId) {
+        console.error('Error obteniendo usuario para pareja');
         return null;
       }
 
       const { data, error } = await this.supabase.supabase
         .from('pareja_miembros')
         .select('pareja_id')
-        .eq('user_id', userData.user.id)
+        .eq('user_id', userId)
         .limit(1)
         .maybeSingle();
 
@@ -67,16 +89,16 @@ export class ParejasService {
   }
 
   async createPair(nombre?: string): Promise<string | null> {
-    const { data: userData, error: userError } = await this.supabase.supabase.auth.getUser();
-    if (userError || !userData.user) {
-      console.error('Error obteniendo usuario para crear pareja:', userError);
+    const userId = await this.getCurrentUserId();
+    if (!userId) {
+      console.error('Error obteniendo usuario para crear pareja');
       return null;
     }
 
     const inviteCode = this.generarInviteCode();
     const { data: pareja, error: parejaError } = await this.supabase.supabase
       .from('parejas')
-      .insert({ nombre: nombre ?? null, created_by: userData.user.id, invite_code: inviteCode })
+      .insert({ nombre: nombre ?? null, created_by: userId, invite_code: inviteCode })
       .select('id')
       .single();
 
@@ -87,7 +109,7 @@ export class ParejasService {
 
     const { error: miembroError } = await this.supabase.supabase
       .from('pareja_miembros')
-      .insert({ pareja_id: pareja.id, user_id: userData.user.id, rol: 'owner' });
+      .insert({ pareja_id: pareja.id, user_id: userId, rol: 'owner' });
 
     if (miembroError) {
       console.error('Error creando miembro de pareja:', miembroError);
@@ -114,6 +136,18 @@ export class ParejasService {
   setParejaId(parejaId: string | null) {
     this.cachedParejaId = parejaId;
     this.pairDetailsCache = undefined;
+  }
+
+  getProfileBundle$(userId: string): Observable<ProfileBundle> {
+    const cached = this.profileBundleCache.get(userId);
+    if (cached) return cached;
+
+    const source$ = defer(() => this.getProfileBundleInternal(userId)).pipe(
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+
+    this.profileBundleCache.set(userId, source$);
+    return source$;
   }
 
   async getPairDetails(): Promise<ParejaInfo | null> {
@@ -197,6 +231,69 @@ export class ParejasService {
     this.pairDetailsCache = undefined;
     this.parejaIdPromise = undefined;
     this.pairDetailsPromise = undefined;
+  }
+
+  invalidateProfileCache(userId?: string) {
+    if (!userId) {
+      this.profileBundleCache.clear();
+      return;
+    }
+    this.profileBundleCache.delete(userId);
+  }
+
+  private async getProfileBundleInternal(userId: string): Promise<ProfileBundle> {
+    const { data, error } = await this.supabase.supabase
+      .from('pareja_miembros')
+      .select(
+        'pareja_id, profiles ( id, nombre, avatar_url ), parejas ( id, invite_code, pareja_miembros ( user_id, rol, profiles ( id, nombre, avatar_url ) ) )'
+      )
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error obteniendo bundle de pareja:', error);
+    }
+
+    let profile: Profile | null = (data as any)?.profiles ?? null;
+    let pareja: ParejaInfo | null = null;
+
+    const parejaData = (data as any)?.parejas ?? null;
+    if (parejaData) {
+      const miembros = ((parejaData.pareja_miembros ?? []) as Array<any>).map((m) => ({
+        user_id: m.user_id,
+        rol: m.rol,
+        nombre: m.profiles?.nombre ?? null,
+      }));
+
+      pareja = {
+        parejaId: parejaData.id,
+        inviteCode: parejaData.invite_code ?? null,
+        miembros,
+      };
+
+      if (!profile) {
+        const me = miembros.find((m) => m.user_id === userId);
+        if (me?.nombre) {
+          profile = { id: userId, nombre: me.nombre, avatar_url: null };
+        }
+      }
+    }
+
+    if (!profile) {
+      const { data: profileData, error: profileError } = await this.supabase.supabase
+        .from('profiles')
+        .select('id, nombre, avatar_url')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error obteniendo perfil:', profileError);
+      }
+
+      profile = (profileData as Profile) ?? null;
+    }
+
+    return { profile, pareja };
   }
 
   private generarInviteCode(): string {
