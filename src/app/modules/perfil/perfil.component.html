@@ -1,6 +1,5 @@
 <div class="max-w-2xl mx-auto p-6">
   <h1 class="text-2xl font-bold text-pink-600">Perfil</h1>
-  <p class="text-gray-600 mb-6">Tu información de usuario</p>
 
   <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
     <div class="flex flex-col items-center gap-4">
@@ -13,46 +12,86 @@
   </div>
 
   <div *ngIf="!cargando" class="bg-white rounded-xl border p-6 shadow">
-    <div class="flex items-center gap-4 mb-6">
+    <div class="flex flex-col items-center gap-3 mb-6">
       <img
-        *ngIf="perfil.avatar_url"
-        [src]="perfil.avatar_url"
+        *ngIf="perfil.avatar_url && !avatarError"
+        [src]="avatarDisplayUrl"
         alt="Avatar"
-        class="w-16 h-16 rounded-full object-cover border"
+        class="w-48 h-48 rounded-full object-cover border"
+        (error)="onAvatarError()"
       />
-      <div>
-        <p class="text-sm text-gray-500">Email</p>
-        <p class="font-medium">{{ email }}</p>
+      <div
+        *ngIf="!perfil.avatar_url || avatarError"
+        class="w-24 h-24 rounded-full flex items-center justify-center bg-pink-100 text-pink-600 font-semibold border text-2xl"
+        aria-label="Avatar por defecto">
+        {{ (perfil.nombre || email || '?').slice(0, 1).toUpperCase() }}
       </div>
     </div>
 
     <div class="space-y-4">
       <div>
+        <p class="text-sm text-gray-500">Email</p>
+        <p class="font-medium">{{ email }}</p>
+      </div>
+      <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
         <input
           type="text"
           [(ngModel)]="perfil.nombre"
+          [disabled]="!isEditing"
           class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
           placeholder="Tu nombre"
         />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Avatar URL</label>
+      <div *ngIf="isEditing">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Subir avatar</label>
         <input
-          type="text"
-          [(ngModel)]="perfil.avatar_url"
-          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
-          placeholder="https://..."
+          type="file"
+          accept="image/*"
+          (change)="subirAvatar($event)"
+          [disabled]="subiendoAvatar || !isEditing"
+          class="w-full border border-gray-300 rounded-md px-3 py-2"
         />
+        <p *ngIf="subiendoAvatar" class="text-sm text-gray-500 mt-1">Subiendo avatar...</p>
       </div>
     </div>
 
     <button
       class="mt-6 bg-gradient-to-br from-pink-400 to-pink-600 text-white px-4 py-2 rounded-md hover:from-pink-500 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
-      (click)="guardarPerfil()"
+      (click)="isEditing ? guardarPerfil() : iniciarEdicion()"
       [disabled]="guardando">
-      Guardar
+      {{ isEditing ? 'Guardar' : 'Modificar' }}
     </button>
+    <button
+      *ngIf="isEditing"
+      class="mt-6 ml-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50"
+      type="button"
+      (click)="cancelarEdicion()">
+      Cancelar
+    </button>
+
+    <div class="mt-8 border-t pt-6">
+      <h2 class="text-lg font-semibold text-gray-800">Pareja</h2>
+      <p class="text-sm text-gray-500 mb-4">Código de invitación e integrantes</p>
+
+      <div *ngIf="cargandoPareja" class="text-sm text-gray-500">Cargando pareja...</div>
+      <div *ngIf="!cargandoPareja">
+        <div class="mb-4">
+          <p class="text-sm text-gray-500">Código</p>
+          <p class="font-mono text-pink-600 font-semibold">{{ parejaCode || '—' }}</p>
+        </div>
+
+        <div>
+          <p class="text-sm text-gray-500 mb-2">Integrantes</p>
+          <ul class="space-y-1">
+            <li *ngFor="let miembro of parejaMiembros" class="text-gray-700">
+              {{ miembro.nombre || miembro.user_id }}
+            </li>
+          </ul>
+          <p *ngIf="parejaMiembros.length === 0" class="text-sm text-gray-500">Sin integrantes.</p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

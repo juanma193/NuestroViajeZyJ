@@ -87,10 +87,11 @@ export class App implements OnInit, OnDestroy {
     const url = (rawUrl || '').split('?')[0].split('#')[0];
 
     const isLogin = url === '/login' || url.startsWith('/login/');
+    const isOnboarding = url === '/onboarding-pareja' || url.startsWith('/onboarding-pareja/');
 
-    this.mostrarNavbar = !isLogin;
+    this.mostrarNavbar = !(isLogin || isOnboarding);
 
-    if (isLogin) {
+    if (isLogin || isOnboarding) {
       this.menuOpen = false;
     }
 
@@ -109,5 +110,6 @@ export class App implements OnInit, OnDestroy {
   async logout() {
     await this.authService.signOut();
     this.closeMenu();
+    await this.router.navigate(['/login']);
   }
 }
