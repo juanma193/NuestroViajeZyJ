@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from '../supabase';
 import { Viaje } from '../models/viaje.model';
+import { ParejasService } from './parejas.service';
 
 @Injectable({
   providedIn: 'root'
@@ -8,12 +9,14 @@ import { Viaje } from '../models/viaje.model';
 export class ViajesService {
   private readonly tableName = 'Viajes';
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private supabase: SupabaseService, private parejasService: ParejasService) {}
 
   async obtenerViajes(): Promise<Viaje[]> {
+    const parejaId = await this.parejasService.getParejaIdActual();
     const { data, error } = await this.supabase.supabase
       .from(this.tableName)
       .select('*')
+      .eq('pareja_id', parejaId ?? '')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -25,9 +28,16 @@ export class ViajesService {
   }
 
   async agregarViaje(viaje: Omit<Viaje, 'id' | 'created_at'>): Promise<Viaje | null> {
+    const parejaId = await this.parejasService.getParejaIdActual();
+    if (!parejaId) {
+      console.error('No hay pareja_id para crear viaje');
+      return null;
+    }
+
+    const payload = { ...viaje, pareja_id: parejaId };
     const { data, error } = await this.supabase.supabase
       .from(this.tableName)
-      .insert([viaje])
+      .insert([payload])
       .select()
       .single();
 

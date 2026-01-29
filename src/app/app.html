@@ -1,5 +1,5 @@
 <main class="min-h-screen bg-gray-50">
-  <header class="bg-gradient-to-r from-pink-200 to-yellow-200">
+  <header *ngIf="mostrarNavbar" class="bg-gradient-to-r from-pink-200 to-yellow-200">
     <div class="max-w-6xl mx-auto px-4">
       <div class="flex items-center justify-between py-6">
         <div>
@@ -23,6 +23,9 @@
           <a routerLink="/cosas-hacer" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">✅ Cosas por Hacer</a>
           <a routerLink="/lugares" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">📍 Lugares</a>
           <a routerLink="/peliculas" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">🎬 Películas/Series</a>
+          <a *ngIf="isAuthed" routerLink="/perfil" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">👤 Perfil</a>
+          <a *ngIf="!isAuthed" routerLink="/login" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">🔐 Iniciar sesión</a>
+          <button *ngIf="isAuthed" class="px-3 py-2 rounded-md hover:bg-white/40" (click)="logout()">🚪 Salir</button>
         </nav>
       </div>
 
@@ -34,6 +37,9 @@
           <a (click)="closeMenu()" routerLink="/cosas-hacer" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">✅ Cosas por Hacer</a>
           <a (click)="closeMenu()" routerLink="/lugares" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">📍 Lugares</a>
           <a (click)="closeMenu()" routerLink="/peliculas" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">🎬 Películas/Series</a>
+          <a *ngIf="isAuthed" (click)="closeMenu()" routerLink="/perfil" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">👤 Perfil</a>
+          <a *ngIf="!isAuthed" (click)="closeMenu()" routerLink="/login" routerLinkActive="active" class="px-3 py-2 rounded-md hover:bg-white/40">🔐 Iniciar sesión</a>
+          <button *ngIf="isAuthed" class="px-3 py-2 rounded-md hover:bg-white/40 text-left" (click)="logout()">🚪 Salir</button>
         </nav>
       </div>
     </div>

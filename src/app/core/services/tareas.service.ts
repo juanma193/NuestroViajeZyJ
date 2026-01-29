@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { SupabaseService } from '../supabase';
 import { Tarea } from '../models/tarea.model';
 import { CategoriaTarea } from '../models/categoria-tarea.model';
+import { ParejasService } from './parejas.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,12 +11,14 @@ export class TareasService {
   private readonly table = 'tareas';
   private readonly tableCategorias = 'categorias_tareas';
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private supabase: SupabaseService, private parejasService: ParejasService) {}
 
   async obtenerTareas(): Promise<Tarea[]> {
+    const parejaId = await this.parejasService.getParejaIdActual();
     const { data, error } = await this.supabase.supabase
       .from(this.table)
       .select('*')
+      .eq('pareja_id', parejaId ?? '')
       .order('fecha_creacion', { ascending: false });
 
     if (error) {
@@ -41,7 +44,14 @@ export class TareasService {
   }
 
   async agregarTarea(tarea: Omit<Tarea, 'id' | 'fecha_creacion' | 'fecha_actualizacion'>): Promise<Tarea | null> {
+    const parejaId = await this.parejasService.getParejaIdActual();
+    if (!parejaId) {
+      console.error('No hay pareja_id para crear tarea');
+      return null;
+    }
+
     const payload: any = { ...tarea };
+    payload.pareja_id = parejaId;
     // Supabase/Postgres date columns cannot accept empty string. Normalize empty dates to null.
     if (payload.fecha_vencimiento === '') {
       payload.fecha_vencimiento = null;

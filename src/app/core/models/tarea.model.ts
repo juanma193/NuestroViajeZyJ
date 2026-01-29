@@ -1,5 +1,6 @@
 export interface Tarea {
   id?: number;
+  pareja_id?: string;
   titulo: string;
   descripcion?: string;
   categoria_id?: number;
