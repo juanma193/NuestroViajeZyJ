@@ -1,12 +1,37 @@
 <div class="max-w-6xl mx-auto p-6">
-  <section class="relative overflow-hidden rounded-3xl shadow-xl" aria-label="Carrusel de recuerdos">
-    <img
-      class="w-full h-72 sm:h-96 md:h-[32rem] object-cover relative z-0"
-      [src]="currentPhoto?.src"
-      [alt]="currentPhoto?.alt || 'Foto destacada'"
-      loading="lazy"
-      decoding="async"
-    />
+  <!-- HERO -->
+  <section
+    class="relative overflow-hidden rounded-3xl shadow-xl"
+    aria-label="Carrusel de recuerdos"
+  >
+    <!-- Si NO hay foto lista, mostramos placeholder -->
+    <ng-container *ngIf="currentPhoto as photo; else heroPlaceholder">
+      <ng-container *ngIf="photo.src; else heroPlaceholder">
+        <img
+          class="w-full h-72 sm:h-96 md:h-[32rem] object-cover relative z-0"
+          [src]="photo.src"
+          [alt]="photo.alt"
+          loading="eager"
+          decoding="async"
+        />
+      </ng-container>
+    </ng-container>
+
+    <ng-template #heroPlaceholder>
+      <div
+        class="w-full h-72 sm:h-96 md:h-[32rem] bg-gradient-to-br from-pink-200 via-rose-100 to-amber-50 relative"
+      >
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent"
+        ></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div
+            class="h-10 w-10 rounded-full border-4 border-white/60 border-t-transparent animate-spin"
+          ></div>
+        </div>
+      </div>
+    </ng-template>
+
     <button
       type="button"
       class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 text-pink-600 shadow-lg hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 z-10"
@@ -15,6 +40,7 @@
     >
       <span aria-hidden="true">‹</span>
     </button>
+
     <button
       type="button"
       class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 text-pink-600 shadow-lg hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 z-10"
@@ -23,9 +49,16 @@
     >
       <span aria-hidden="true">›</span>
     </button>
-    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-transparent z-0 pointer-events-none"></div>
-    <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10 pointer-events-none">
-      <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white drop-shadow">Nuestros recuerdos favoritos, un día a la vez 💕</h2>
+
+    <div
+      class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-transparent z-0 pointer-events-none"
+    ></div>
+    <div
+      class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10 pointer-events-none"
+    >
+      <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white drop-shadow">
+        Nuestros recuerdos favoritos, un día a la vez 💕
+      </h2>
       <p class="mt-3 text-white/90">{{ fraseAleatoria }}</p>
     </div>
   </section>
@@ -36,19 +69,83 @@
     <div class="h-px flex-1 bg-gradient-to-r from-transparent via-pink-300 to-transparent"></div>
   </div>
 
+  <!-- MURAL -->
   <section aria-label="Mural de fotos">
-    <h3 class="text-xl font-semibold text-pink-600 mb-4">Momentos en imágenes</h3>
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-      <figure class="group relative aspect-square overflow-hidden rounded-xl" *ngFor="let photo of photos">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <h3 class="text-xl font-semibold text-pink-600">Momentos en imágenes</h3>
+
+      <div class="flex items-center gap-2">
+        <input
+          #inicioFileInput
+          type="file"
+          class="hidden"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          (change)="onFileSelected($event)"
+        />
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-full bg-pink-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-pink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 disabled:opacity-60"
+          (click)="inicioFileInput.click()"
+          [disabled]="isUploading"
+          [attr.aria-busy]="isUploading"
+        >
+          <span
+            *ngIf="isUploading"
+            class="h-4 w-4 rounded-full border-2 border-white/70 border-t-transparent animate-spin"
+            aria-hidden="true"
+          ></span>
+          <span>{{ isUploading ? 'Subiendo...' : 'Subir foto' }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Skeleton grid mientras carga (queda lindo y ocupa el lugar real) -->
+    <div
+      *ngIf="isLoadingPhotos && !inicioPhotos.length"
+      class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"
+    >
+      <div
+        *ngFor="let _ of [].constructor(skeletonCount); let i = index"
+        class="relative aspect-square overflow-hidden rounded-xl bg-pink-100/60 animate-pulse"
+      >
+        <div
+          class="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-transparent"
+        ></div>
+        <div class="absolute bottom-2 left-2 right-2 h-3 rounded bg-white/30"></div>
+      </div>
+    </div>
+
+    <p *ngIf="!isLoadingPhotos && !inicioPhotos.length" class="text-sm text-pink-400 mb-3">
+      Aún no hay fotos. ¡Subí la primera!
+    </p>
+
+    <!-- Grid real: si alguna foto aún no tiene src, mostrás placeholder por tile -->
+    <div *ngIf="inicioPhotos.length" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      <figure
+        class="group relative aspect-square overflow-hidden rounded-xl"
+        *ngFor="let photo of inicioPhotos; trackBy: trackByPhotoId"
+      >
+        <div *ngIf="!photo.src" class="absolute inset-0 bg-pink-100/60 animate-pulse">
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-transparent"
+          ></div>
+        </div>
+
         <img
+          *ngIf="photo.src"
           class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           [src]="photo.src"
           [alt]="photo.alt"
           loading="lazy"
           decoding="async"
         />
-        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300"></div>
-        <figcaption class="absolute bottom-2 left-2 right-2 text-xs text-white/0 group-hover:text-white/90 transition-colors duration-300 drop-shadow">
+        <div
+          class="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300"
+        ></div>
+        <figcaption
+          class="absolute bottom-2 left-2 right-2 text-xs text-white/0 group-hover:text-white/90 transition-colors duration-300 drop-shadow"
+        >
           {{ photo.caption }}
         </figcaption>
         <div class="absolute inset-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)]"></div>
