@@ -15,7 +15,21 @@ type UiPhoto = { id: number | string; src: string; alt: string; caption: string;
 export class InicioComponent implements OnInit {
   currentPhotoIndex = 0;
 
-  readonly frases = ['Siempre vos', 'Mi lugar seguro', 'Con vos todo', 'Un día a la vez', 'Nosotros 💖'];
+  readonly frases = [
+    'Siempre juntos',
+    'Nuestro lugar',
+    'Un día a la vez',
+    'Lo nuestro',
+    'Así somos',
+    'Parte del camino',
+    'Elegirnos',
+    'Compartir',
+    'Construir juntos',
+    'Estar ahí',
+    'Seguir sumando',
+    'Lo que importa',
+  ];
+
   readonly fraseAleatoria = this.frases[Math.floor(Math.random() * this.frases.length)];
 
   readonly maxFileSizeMb = 8;
@@ -32,12 +46,18 @@ export class InicioComponent implements OnInit {
 
   // Texto/captions
   readonly captions = [
-    'Buenos Aires 🌙',
-    'Primer viaje juntos',
-    'Verano eterno ☀️',
-    'Nuestro rincón',
-    'Risas infinitas',
-    'Atardecer perfecto',
+    'Un recuerdo especial',
+    'Un momento compartido',
+    'Parte de nuestra historia',
+    'Así se sintió',
+    'Un instante guardado',
+    'Lo que quedó',
+    'Un momento más',
+    'Un recuerdo nuestro',
+    'Así fue',
+    'Una imagen que dice todo',
+    'Un pedacito de nosotros',
+    'Algo para recordar',
   ];
 
   constructor(
@@ -45,7 +65,7 @@ export class InicioComponent implements OnInit {
     private readonly parejasService: ParejasService,
     private readonly toastService: ToastService,
     private readonly cdr: ChangeDetectorRef,
-    private readonly ngZone: NgZone
+    private readonly ngZone: NgZone,
   ) {}
 
   async ngOnInit() {
@@ -68,7 +88,8 @@ export class InicioComponent implements OnInit {
 
   prevPhoto() {
     if (!this.inicioPhotos.length) return;
-    this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.inicioPhotos.length) % this.inicioPhotos.length;
+    this.currentPhotoIndex =
+      (this.currentPhotoIndex - 1 + this.inicioPhotos.length) % this.inicioPhotos.length;
     this.cdr.detectChanges();
   }
 
@@ -118,10 +139,14 @@ export class InicioComponent implements OnInit {
       this.cdr.detectChanges();
 
       // Resolver URLs progresivamente y actualizar UI dentro de zona
-      await this.inicioPhotosService.hydrateUrlsProgressive(parejaId, this.inicioPhotos, (path, url) => {
-        // Esto asegura que Angular se entere aunque sea zoneless / fuera de la zona
-        this.ngZone.run(() => this.setPhotoSrc(path, url));
-      });
+      await this.inicioPhotosService.hydrateUrlsProgressive(
+        parejaId,
+        this.inicioPhotos,
+        (path, url) => {
+          // Esto asegura que Angular se entere aunque sea zoneless / fuera de la zona
+          this.ngZone.run(() => this.setPhotoSrc(path, url));
+        },
+      );
 
       // Ajuste índice si quedó fuera
       if (this.currentPhotoIndex >= this.inicioPhotos.length) this.currentPhotoIndex = 0;
@@ -158,7 +183,8 @@ export class InicioComponent implements OnInit {
   private validateFile(file: File): string | null {
     const sizeMb = file.size / 1024 / 1024;
     if (sizeMb > this.maxFileSizeMb) return `Archivo muy grande (máx ${this.maxFileSizeMb}MB).`;
-    if (file.type && !this.allowedTypes.includes(file.type)) return 'Formato no permitido. Usa JPG, PNG o WEBP.';
+    if (file.type && !this.allowedTypes.includes(file.type))
+      return 'Formato no permitido. Usa JPG, PNG o WEBP.';
     return null;
   }
 
