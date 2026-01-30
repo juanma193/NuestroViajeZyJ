@@ -3,13 +3,14 @@ import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { InicioPhotosService } from '../../core/services/inicio-photos.service';
 import { ParejasService } from '../../core/services/parejas.service';
 import { ToastService } from '../../core/toast/services/toast.service';
+import { ModalConfirmComponent } from '../peliculas/modal-confirm/modal-confirm.component';
 
 type UiPhoto = { id: number | string; src: string; alt: string; caption: string; path: string };
 
 @Component({
   selector: 'app-inicio',
   standalone: true,
-  imports: [NgFor, NgIf],
+  imports: [NgFor, NgIf, ModalConfirmComponent],
   templateUrl: './inicio.component.html',
 })
 export class InicioComponent implements OnInit {
@@ -35,9 +36,11 @@ export class InicioComponent implements OnInit {
   readonly maxFileSizeMb = 8;
   readonly allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
   readonly maxTotalImages = 12;
-
+  deletingIds = new Set<number | string>();
   isLoadingPhotos = false;
   isUploading = false;
+  mostrarModalConfirm = false;
+  fotoAEliminar?: UiPhoto;
 
   // ⚡ Para que no se vea feo: placeholders
   readonly skeletonCount = 8;
@@ -225,6 +228,66 @@ export class InicioComponent implements OnInit {
       }
     } finally {
       this.isUploading = false;
+      this.ngZone.run(() => this.cdr.detectChanges());
+    }
+  }
+  async deleteInicioPhoto(photo: UiPhoto) {
+    if (!photo?.id || !photo?.path) return;
+    if (this.deletingIds.has(photo.id)) return;
+
+    this.fotoAEliminar = photo;
+    this.mostrarModalConfirm = true;
+    this.ngZone.run(() => this.cdr.detectChanges());
+  }
+
+  cerrarModalConfirm() {
+    this.mostrarModalConfirm = false;
+    this.fotoAEliminar = undefined;
+  }
+
+  async confirmarEliminarInicioPhoto() {
+    const photo = this.fotoAEliminar;
+    this.cerrarModalConfirm();
+    if (!photo?.id || !photo?.path) return;
+
+    const parejaId = await this.parejasService.getParejaIdActual();
+    if (!parejaId) {
+      this.toastService.showError('Error', 'No se encontró la pareja actual.');
+      return;
+    }
+
+    if (this.deletingIds.has(photo.id)) return;
+
+    this.deletingIds.add(photo.id);
+    this.ngZone.run(() => this.cdr.detectChanges());
+
+    const prevPhotos = [...this.inicioPhotos];
+    const removedIndex = this.inicioPhotos.findIndex((p) => p.id === photo.id);
+
+    this.inicioPhotos = this.inicioPhotos.filter((p) => p.id !== photo.id);
+
+    if (!this.inicioPhotos.length) {
+      this.currentPhotoIndex = 0;
+    } else if (this.currentPhotoIndex > removedIndex) {
+      this.currentPhotoIndex = this.currentPhotoIndex - 1;
+    } else if (this.currentPhotoIndex === removedIndex) {
+      this.currentPhotoIndex = Math.min(this.currentPhotoIndex, this.inicioPhotos.length - 1);
+    }
+
+    this.ngZone.run(() => this.cdr.detectChanges());
+
+    try {
+      const success = await this.inicioPhotosService.deletePhoto(photo.id, photo.path);
+      if (!success) {
+        this.inicioPhotos = prevPhotos;
+        this.toastService.showError('Error', 'No se pudo eliminar la foto.');
+        this.ngZone.run(() => this.cdr.detectChanges());
+        return;
+      }
+
+      this.toastService.showSuccess('Listo', 'Foto eliminada.');
+    } finally {
+      this.deletingIds.delete(photo.id);
       this.ngZone.run(() => this.cdr.detectChanges());
     }
   }

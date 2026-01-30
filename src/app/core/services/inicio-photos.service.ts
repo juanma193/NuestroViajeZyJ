@@ -218,21 +218,26 @@ export class InicioPhotosService {
   // --------------------------------------------
   // Delete
   // --------------------------------------------
-  async deletePhoto(parejaId: string, id: number | string, path: string): Promise<boolean> {
-    const { error: deleteError } = await this.supabase.supabase.from(this.tableName).delete().eq('id', id);
+  async deletePhoto(id: number | string, path: string): Promise<boolean> {
+    const { error: dbError } = await this.supabase.supabase
+      .from(this.tableName)
+      .delete()
+      .eq('id', id);
 
-    if (deleteError) {
-      console.error('[InicioPhotosService] delete record error:', deleteError);
+    if (dbError) {
+      console.error('Error DB delete:', dbError);
       return false;
     }
 
-    const { error: storageError } = await this.supabase.supabase.storage.from(this.bucketName).remove([path]);
+    const { error: storageError } = await this.supabase.supabase.storage
+      .from(this.bucketName)
+      .remove([path]);
+
     if (storageError) {
-      console.error('[InicioPhotosService] delete storage error:', storageError);
+      console.error('Error storage delete:', storageError);
       return false;
     }
 
-    this.evictCache(parejaId, path);
     return true;
   }
 
@@ -317,4 +322,6 @@ export class InicioPhotosService {
 
     return null;
   }
+
+  
 }
