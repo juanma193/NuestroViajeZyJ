@@ -242,55 +242,88 @@ export class ParejasService {
   }
 
   private async getProfileBundleInternal(userId: string): Promise<ProfileBundle> {
-    const { data, error } = await this.supabase.supabase
+    const { data: miembroData, error: miembroError } = await this.supabase.supabase
       .from('pareja_miembros')
-      .select(
-        'pareja_id, profiles ( id, nombre, avatar_url ), parejas ( id, invite_code, pareja_miembros ( user_id, rol, profiles ( id, nombre, avatar_url ) ) )'
-      )
+      .select('pareja_id')
       .eq('user_id', userId)
       .maybeSingle();
 
-    if (error) {
-      console.error('Error obteniendo bundle de pareja:', error);
+    if (miembroError) {
+      console.error('Error obteniendo pareja para el usuario:', miembroError);
     }
 
-    let profile: Profile | null = (data as any)?.profiles ?? null;
+    const parejaId = miembroData?.pareja_id ?? null;
+    let profile: Profile | null = null;
     let pareja: ParejaInfo | null = null;
 
-    const parejaData = (data as any)?.parejas ?? null;
-    if (parejaData) {
-      const miembros = ((parejaData.pareja_miembros ?? []) as Array<any>).map((m) => ({
-        user_id: m.user_id,
-        rol: m.rol,
-        nombre: m.profiles?.nombre ?? null,
-      }));
+    const { data: profileData, error: profileError } = await this.supabase.supabase
+      .from('profiles')
+      .select('id, nombre, avatar_url')
+      .eq('id', userId)
+      .maybeSingle();
 
-      pareja = {
-        parejaId: parejaData.id,
-        inviteCode: parejaData.invite_code ?? null,
-        miembros,
-      };
-
-      if (!profile) {
-        const me = miembros.find((m) => m.user_id === userId);
-        if (me?.nombre) {
-          profile = { id: userId, nombre: me.nombre, avatar_url: null };
-        }
-      }
+    if (profileError) {
+      console.error('Error obteniendo perfil:', profileError);
     }
 
-    if (!profile) {
-      const { data: profileData, error: profileError } = await this.supabase.supabase
-        .from('profiles')
-        .select('id, nombre, avatar_url')
-        .eq('id', userId)
-        .maybeSingle();
+    profile = (profileData as Profile) ?? null;
 
-      if (profileError) {
-        console.error('Error obteniendo perfil:', profileError);
+    if (parejaId) {
+      const { data: parejaData, error: parejaError } = await this.supabase.supabase
+        .from('parejas')
+        .select('id, invite_code')
+        .eq('id', parejaId)
+        .single();
+
+      if (parejaError) {
+        console.error('Error obteniendo pareja:', parejaError);
+      } else {
+        const { data: miembrosData, error: miembrosError } = await this.supabase.supabase
+          .from('pareja_miembros')
+          .select('user_id, rol')
+          .eq('pareja_id', parejaId);
+
+        if (miembrosError) {
+          console.error('Error obteniendo miembros:', miembrosError);
+        } else {
+          const userIds = (miembrosData ?? []).map((m) => m.user_id).filter(Boolean);
+          let profilesMap = new Map<string, { nombre?: string | null }>();
+
+          if (userIds.length) {
+            const { data: profilesData, error: profilesError } = await this.supabase.supabase
+              .from('profiles')
+              .select('id, nombre')
+              .in('id', userIds);
+
+            if (profilesError) {
+              console.error('Error obteniendo perfiles:', profilesError);
+            } else if (profilesData) {
+              profilesMap = new Map(
+                profilesData.map((p) => [p.id, { nombre: p.nombre }])
+              ) as Map<string, { nombre?: string | null }>;
+            }
+          }
+
+          const miembros = (miembrosData ?? []).map((m) => ({
+            user_id: m.user_id,
+            rol: m.rol,
+            nombre: profilesMap.get(m.user_id)?.nombre ?? null,
+          }));
+
+          pareja = {
+            parejaId: parejaData.id,
+            inviteCode: parejaData.invite_code ?? null,
+            miembros,
+          };
+
+          if (!profile) {
+            const me = miembros.find((m) => m.user_id === userId);
+            if (me?.nombre) {
+              profile = { id: userId, nombre: me.nombre, avatar_url: null };
+            }
+          }
+        }
       }
-
-      profile = (profileData as Profile) ?? null;
     }
 
     return { profile, pareja };

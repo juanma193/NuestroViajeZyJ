@@ -25,7 +25,7 @@ import { ToastContainerComponent } from './core/toast/components/container/toast
   templateUrl: './app.html',
 })
 export class App implements OnInit, OnDestroy {
-  readonly title = 'Nuestro diario';
+  readonly title = 'Nuestro Viaje';
 
   menuOpen = false;
   isAuthed = false;
