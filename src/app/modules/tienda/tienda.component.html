@@ -1,0 +1,58 @@
+<div class="min-h-[calc(100vh-80px)] bg-gradient-to-b from-pink-100 via-rose-50 to-amber-100 px-4 py-8">
+  <div class="mx-auto max-w-5xl">
+    <!-- Título -->
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center gap-3">
+        <span class="text-3xl">🛍️</span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-pink-500">
+          Nuestra Tienda
+        </h1>
+      </div>
+      <p class="mt-2 text-gray-700 font-medium">
+        Descubre productos especiales para nuestros momentos juntos
+      </p>
+    </div>
+
+    <!-- Card -->
+    <div class="rounded-[28px] bg-white/35 backdrop-blur-md border border-white/60 shadow-2xl overflow-hidden">
+      <div class="p-8 sm:p-12 text-center">
+        <div class="mx-auto max-w-md">
+          <div class="text-6xl mb-5">🛒</div>
+
+          <h2 class="text-2xl font-extrabold text-gray-900">
+            Nuestro Viaje
+          </h2>
+
+          <p class="mt-3 text-gray-700">
+            Tiendanube no permite abrir la tienda dentro de esta página por seguridad.
+          </p>
+
+          <p class="mt-2 text-sm text-gray-500">
+            Se abrirá en una nueva pestaña y podés volver cuando quieras 💕
+          </p>
+
+          <button
+            (click)="abrirTiendaExterna()"
+            type="button"
+            class="mt-7 inline-flex items-center justify-center gap-3 rounded-2xl px-8 py-4 font-extrabold text-white shadow-lg transition duration-200 hover:shadow-xl hover:scale-[1.03] bg-gradient-to-r from-pink-500 to-rose-500"
+          >
+            <span>🛍️</span>
+            <span>Abrir tienda</span>
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </button>
+
+          <div class="mt-6 text-xs text-gray-500">
+            🔒 Apertura segura (noopener / noreferrer)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="mt-6 text-center text-sm text-gray-600">
+      ✨ Productos seleccionados especialmente para nosotros ✨
+    </p>
+  </div>
+</div>

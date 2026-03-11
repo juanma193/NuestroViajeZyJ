@@ -44,6 +44,11 @@ export const routes: Routes = [
     loadComponent: () => import('./modules/peliculas/peliculas.component').then(m => m.PeliculasComponent)
   },
   {
+    path: 'tienda',
+    canActivate: [authGuard, pairGuard],
+    loadComponent: () => import('./modules/tienda/tienda.component').then(m => m.TiendaComponent)
+  },
+  {
     path: 'onboarding-pareja',
     canActivate: [authGuard],
     loadComponent: () => import('./modules/onboarding-pareja/onboarding-pareja.component').then(m => m.OnboardingParejaComponent)

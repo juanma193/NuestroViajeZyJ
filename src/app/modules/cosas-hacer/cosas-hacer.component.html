@@ -51,7 +51,7 @@
     </div>
   </div>
 
-  <app-modal-tarea *ngIf="mostrarModal" [categorias]="categoriasSinTodas" [tareaEditar]="tareaEditar" (cerrar)="cerrarModal()" (guardar)="agregarTarea($event)"></app-modal-tarea>
+  <app-modal-tarea *ngIf="mostrarModal" [categorias]="categoriasSinTodas" [tareaEditar]="tareaEditar" (cerrar)="cerrarModal()" (guardar)="guardarTarea($event)"></app-modal-tarea>
 
   <app-modal-confirm *ngIf="mostrarModalConfirm" [titulo]="'Eliminar tarea'" [mensaje]="'¿Eliminar esta tarea?'" (cancelar)="cerrarModalConfirm()" (confirmar)="confirmarEliminar()"></app-modal-confirm>
 </div>

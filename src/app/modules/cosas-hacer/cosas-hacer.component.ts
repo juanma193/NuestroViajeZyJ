@@ -60,10 +60,15 @@ export class CosasHacerComponent implements OnInit {
   }
 
   get tareasFiltradas() {
-    if (this.categoriaSeleccionada === 'Todas') return this.tareas;
-    const cid = typeof this.categoriaSeleccionada === 'number' ? this.categoriaSeleccionada : undefined;
-    if (!cid) return this.tareas;
-    return this.tareas.filter(t => t.categoria_id === cid);
+    let tareas = this.categoriaSeleccionada === 'Todas' 
+      ? this.tareas 
+      : this.tareas.filter(t => t.categoria_id === (typeof this.categoriaSeleccionada === 'number' ? this.categoriaSeleccionada : undefined));
+    
+    // Ordenar: primero las no completadas, luego las completadas
+    return tareas.sort((a, b) => {
+      if (a.completada === b.completada) return 0;
+      return a.completada ? 1 : -1;
+    });
   }
 
   get categoriasSinTodas() {
@@ -88,11 +93,20 @@ export class CosasHacerComponent implements OnInit {
     this.mostrarModal = false;
   }
 
-  async agregarTarea(tarea: Omit<Tarea, 'id' | 'fecha_creacion' | 'fecha_actualizacion'>) {
+  async guardarTarea(tarea: Omit<Tarea, 'id' | 'fecha_creacion' | 'fecha_actualizacion'>) {
     try {
       this.cargando = true;
       this.cdr.detectChanges();
-      const res = await this.tareasService.agregarTarea(tarea);
+      
+      let res;
+      if (this.tareaEditar?.id) {
+        // Editar tarea existente
+        res = await this.tareasService.actualizarTarea(this.tareaEditar.id, tarea);
+      } else {
+        // Crear nueva tarea
+        res = await this.tareasService.agregarTarea(tarea);
+      }
+      
       if (res) {
         this.cerrarModal();
         await this.cargarDatos();
@@ -101,7 +115,7 @@ export class CosasHacerComponent implements OnInit {
         this.toastService.showError('Error', 'No se pudo guardar la tarea');
       }
     } catch (error) {
-      console.error('Error agregando tarea:', error);
+      console.error('Error guardando tarea:', error);
       this.toastService.showError('Error', 'Error al guardar la tarea');
     } finally {
       this.cargando = false;

@@ -144,6 +144,16 @@
               <span class="text-gray-500">›</span>
             </a>
 
+            <a
+              (click)="closeMenu()"
+              routerLink="/tienda"
+              routerLinkActive="bg-white/55 shadow-md ring-1 ring-white/70 text-gray-900"
+              class="flex items-center justify-between px-3 py-3 rounded-2xl text-sm font-extrabold text-gray-800 bg-white/20 hover:bg-white/35 transition"
+            >
+              <span class="flex items-center gap-2">🛍️ <span>Tienda</span></span>
+              <span class="text-gray-500">›</span>
+            </a>
+
             <div class="pt-3 space-y-2">
               <a
                 *ngIf="isAuthed"

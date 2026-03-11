@@ -1,55 +1,267 @@
-<div class="mx-auto relative overflow-hidden min-h-[90vh] p-8 bg-[url('/assets/FotoLugares.jpeg')] bg-cover bg-center bg-no-repeat">
-  <div class="pointer-events-none absolute inset-0 bg-white/70"></div>
+<div class="mx-auto relative overflow-hidden min-h-[90vh] p-4 sm:p-8 bg-[url('/assets/FotoLugares.jpeg')] bg-cover bg-center bg-no-repeat">
+  <!-- Fondo mejorado: más blur, menos opacidad -->
+  <div class="pointer-events-none absolute inset-0 bg-white/80 backdrop-blur-sm"></div>
 
-  <div class="relative max-w-5xl mx-auto p-6">
-    <h1 class="text-2xl font-bold text-pink-600">📍 Lugares para Visitar</h1>
-    <p class="text-gray-600 mb-6">Tu lista de destinos soñados</p>
+  <div class="relative max-w-6xl mx-auto">
+    <!-- Header mejorado -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-400 mb-2">
+        ✈️ Lugares para Visitar
+      </h1>
+      <p class="text-gray-600 text-sm sm:text-base">Tu lista de sueños compartidos</p>
+    </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-      <div class="bg-white rounded-xl p-4 shadow text-center">
-        <span class="block text-3xl font-bold text-pink-500">{{ lugares.length }}</span>
-        <span class="text-gray-600">Total</span>
-      </div>
-      <div class="bg-white rounded-xl p-4 shadow text-center">
-        <span class="block text-3xl font-bold text-pink-500">{{ lugaresPendientes }}</span>
-        <span class="text-gray-600">Por Visitar</span>
-      </div>
-      <div class="bg-white rounded-xl p-4 shadow text-center">
-        <span class="block text-3xl font-bold text-pink-500">{{ lugaresVisitados }}</span>
-        <span class="text-gray-600">Visitados</span>
+    <!-- Spinner de carga mejorado -->
+    <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div class="flex flex-col items-center gap-4 bg-white/90 backdrop-blur-md rounded-3xl p-8 shadow-2xl">
+        <svg class="w-16 h-16 text-pink-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <span class="text-gray-800 font-semibold text-lg">Cargando destinos...</span>
       </div>
     </div>
 
-    <button class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 mb-6" (click)="agregarLugar()">➕ Agregar Lugar</button>
+    <!-- Estadísticas mejoradas -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+      <!-- Total -->
+      <div class="group bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-pink-100">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-4xl">🌍</div>
+          <div class="text-4xl font-black text-pink-500">{{ lugares.length }}</div>
+        </div>
+        <p class="text-gray-600 font-semibold text-sm">Total destinos</p>
+      </div>
+      
+      <!-- Por Visitar -->
+      <div class="group bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-orange-100">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-4xl">🎯</div>
+          <div class="text-4xl font-black text-orange-500">{{ lugaresPendientes }}</div>
+        </div>
+        <p class="text-gray-600 font-semibold text-sm">Por visitar</p>
+      </div>
+      
+      <!-- Visitados -->
+      <div class="group bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-green-100">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-4xl">✅</div>
+          <div class="text-4xl font-black text-green-500">{{ lugaresVisitados }}</div>
+        </div>
+        <p class="text-gray-600 font-semibold text-sm">Visitados</p>
+      </div>
+    </div>
 
-    <div class="flex flex-wrap gap-2 mb-6">
-      @for (tipo of tipos; track tipo) {
-        <button (click)="cambiarTipo(tipo)" [ngClass]="{ 'bg-pink-300 text-white': tipoSeleccionado === tipo }" class="px-3 py-1 rounded-full border">{{ tipo }}</button>
+    <!-- Botón agregar lugar - PROTAGONISTA -->
+    <div class="flex justify-center mb-8">
+      <button 
+        (click)="abrirModal()"
+        class="group relative bg-gradient-to-r from-pink-400 via-rose-400 to-orange-400 text-white rounded-full px-8 py-4 font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95"
+      >
+        <span class="flex items-center gap-3">
+          <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
+          </svg>
+          <span>Agregar nuevo destino</span>
+          <span class="text-2xl">✨</span>
+        </span>
+      </button>
+    </div>
+
+    <!-- Filtros por estado mejorados -->
+    <div class="flex flex-wrap justify-center gap-3 mb-6">
+      <button 
+        (click)="cambiarEstado('Todos')" 
+        [ngClass]="estadoSeleccionado === 'Todos' 
+          ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-105' 
+          : 'bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-md'" 
+        class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 border border-pink-200"
+      >
+        <span class="flex items-center gap-2">
+          <span class="text-lg">🌍</span>
+          <span>Todos</span>
+        </span>
+      </button>
+      
+      <button 
+        (click)="cambiarEstado('Por Visitar')" 
+        [ngClass]="estadoSeleccionado === 'Por Visitar' 
+          ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white shadow-lg scale-105' 
+          : 'bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-md'" 
+        class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 border border-orange-200"
+      >
+        <span class="flex items-center gap-2">
+          <span class="text-lg">🎯</span>
+          <span>Por Visitar</span>
+        </span>
+      </button>
+      
+      <button 
+        (click)="cambiarEstado('Visitados')" 
+        [ngClass]="estadoSeleccionado === 'Visitados' 
+          ? 'bg-gradient-to-r from-green-400 to-emerald-400 text-white shadow-lg scale-105' 
+          : 'bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-md'" 
+        class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 border border-green-200"
+      >
+        <span class="flex items-center gap-2">
+          <span class="text-lg">✅</span>
+          <span>Visitados</span>
+        </span>
+      </button>
+    </div>
+
+    <!-- Filtros por categoría mejorados -->
+    <div class="flex flex-wrap justify-center gap-2 mb-8">
+      @for (categoria of categoriasUnicas; track categoria) {
+        <button 
+          (click)="cambiarCategoria(categoria)" 
+          [ngClass]="categoriaSeleccionada === categoria 
+            ? 'bg-pink-500 text-white shadow-md scale-105' 
+            : 'bg-white/70 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-sm'" 
+          class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 transform hover:scale-105 border border-pink-100"
+        >
+          <span class="flex items-center gap-1.5">
+            <span>{{ getCategoriaEmoji(categoria) }}</span>
+            <span>{{ categoria }}</span>
+          </span>
+        </button>
       }
     </div>
 
-    <div class="grid gap-4">
+    <!-- Listado de lugares mejorado -->
+    <div class="grid gap-5 pb-8">
       @for (lugar of lugaresFiltrados; track lugar.id) {
-        <div class="bg-white rounded-xl p-4 shadow" [ngClass]="{ 'opacity-80': lugar.visitado }">
-          <div class="flex justify-between items-center mb-2">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-50 text-pink-600 text-sm font-semibold">{{ lugar.tipo }}</div>
-            <span *ngIf="lugar.visitado" class="inline-flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">✓ Visitado</span>
-          </div>
+        <div 
+          class="group bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
+          [ngClass]="{ 'opacity-75': lugar.visitado }"
+        >
+          <div class="p-5 sm:p-6">
+            <!-- Header de la card -->
+            <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+              <!-- Categoría con emoji -->
+              <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-50 to-orange-50 border border-pink-200">
+                <span class="text-xl">{{ getCategoriaEmoji(lugar.categoria) }}</span>
+                <span class="text-sm font-bold text-pink-600">{{ lugar.categoria }}</span>
+              </div>
+              
+              <!-- Badge de estado -->
+              <div *ngIf="lugar.visitado" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 animate-pulse">
+                <span class="text-lg">✓</span>
+                <span class="text-sm font-bold text-green-700">Visitado</span>
+              </div>
+            </div>
 
-          <div class="mb-3">
-            <h3 class="text-lg font-semibold">{{ lugar.nombre }}</h3>
-            <p class="text-sm text-gray-500">📍 {{ lugar.ciudad }}, {{ lugar.pais }}</p>
-            <p class="text-gray-700 mt-2">{{ lugar.descripcion }}</p>
-          </div>
+            <!-- Contenido principal -->
+            <div class="mb-4 space-y-2">
+              <h3 class="text-xl sm:text-2xl font-bold text-gray-900 group-hover:text-pink-600 transition-colors">
+                {{ lugar.nombre }}
+              </h3>
+              
+              <div class="flex items-center gap-2 text-gray-600">
+                <svg class="w-4 h-4 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-sm sm:text-base font-medium">{{ lugar.ubicacion }}</span>
+              </div>
+              
+              <p *ngIf="lugar.descripcion" class="text-gray-600 text-sm sm:text-base leading-relaxed mt-2">
+                {{ lugar.descripcion }}
+              </p>
+            </div>
 
-          <div class="flex gap-2">
-            <button class="px-3 py-2 rounded-md border text-pink-600" (click)="toggleVisitado(lugar)" [ngClass]="{ 'bg-pink-600 text-white': lugar.visitado }">{{ lugar.visitado ? '✅ Visitado' : '🎯 Marcar como visitado' }}</button>
-            <button class="px-3 py-2 bg-red-500 text-white rounded-md" (click)="eliminarLugar(lugar.id)">🗑️</button>
+            <!-- Botones de acción mejorados -->
+            <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
+              <!-- Botón marcar visitado/pendiente -->
+              <button 
+                *ngIf="!lugar.visitado"
+                (click)="toggleVisitado(lugar)" 
+                class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>Marcar visitado</span>
+              </button>
+
+              <button 
+                *ngIf="lugar.visitado"
+                (click)="toggleVisitado(lugar)" 
+                class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>Visitado</span>
+              </button>
+
+              <!-- Botón editar -->
+              <button 
+                (click)="abrirModal(lugar)"
+                class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 border border-amber-200 hover:shadow-md transition-all duration-300 transform hover:scale-105 active:scale-95"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                <span>Editar</span>
+              </button>
+
+              <!-- Botón eliminar -->
+              <button 
+                (click)="abrirModalConfirm(lugar.id)"
+                class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <span>Eliminar</span>
+              </button>
+            </div>
           </div>
         </div>
       } @empty {
-        <div class="text-center py-8 text-gray-500">No hay lugares en esta categoría</div>
+        <!-- Estado vacío mejorado -->
+        <div class="text-center py-16 bg-white/95 backdrop-blur-md rounded-3xl shadow-xl">
+          <div class="text-8xl mb-6 animate-bounce">✨</div>
+          <h3 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">
+            {{ estadoSeleccionado === 'Todos' ? 'Tu lista de sueños está vacía' : 'No hay lugares en este filtro' }}
+          </h3>
+          <p class="text-gray-600 mb-6 text-sm sm:text-base max-w-md mx-auto px-4">
+            {{ estadoSeleccionado === 'Todos' 
+              ? '¡Empieza a planear las aventuras que quieren vivir juntos!' 
+              : 'Prueba con otro filtro o agrega más destinos' }}
+          </p>
+          <button 
+            *ngIf="estadoSeleccionado === 'Todos'" 
+            (click)="abrirModal()"
+            class="inline-flex items-center gap-3 bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 text-white rounded-full px-8 py-4 font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
+            </svg>
+            <span>Agregar primer destino</span>
+            <span class="text-2xl">🗺️</span>
+          </button>
+        </div>
       }
     </div>
   </div>
+
+  <!-- Modal para agregar/editar -->
+  <!-- Modal para agregar/editar -->
+  <app-modal-lugar 
+    *ngIf="mostrarModal" 
+    [lugarEditar]="lugarEditar" 
+    (cerrar)="cerrarModal()" 
+    (guardar)="guardarLugar($event)"
+  ></app-modal-lugar>
+
+  <!-- Modal de confirmación para eliminar -->
+  <app-modal-confirm
+    *ngIf="mostrarModalConfirm"
+    titulo="¿Eliminar lugar?"
+    mensaje="¿Estás seguro de que quieres eliminar este lugar? Esta acción no se puede deshacer."
+    textoBotonConfirmar="Eliminar"
+    (confirmar)="confirmarEliminar()"
+    (cancelar)="cerrarModalConfirm()"
+  ></app-modal-confirm>
 </div>
