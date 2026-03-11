@@ -1,6 +1,6 @@
 <div class="mx-auto relative overflow-hidden min-h-[90vh] p-4 sm:p-8 bg-[url('/assets/FotoLugares.jpeg')] bg-cover bg-center bg-no-repeat">
-  <!-- Fondo mejorado: más blur, menos opacidad -->
-  <div class="pointer-events-none absolute inset-0 bg-white/80 backdrop-blur-sm"></div>
+  <!-- Fondo optimizado: sin blur para mejor performance -->
+  <div class="pointer-events-none absolute inset-0 bg-white/85"></div>
 
   <div class="relative max-w-6xl mx-auto">
     <!-- Header mejorado -->
@@ -11,9 +11,9 @@
       <p class="text-gray-600 text-sm sm:text-base">Tu lista de sueños compartidos</p>
     </div>
 
-    <!-- Spinner de carga mejorado -->
-    <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div class="flex flex-col items-center gap-4 bg-white/90 backdrop-blur-md rounded-3xl p-8 shadow-2xl">
+    <!-- Spinner de carga optimizado -->
+    <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div class="flex flex-col items-center gap-4 bg-white rounded-3xl p-8 shadow-2xl">
         <svg class="w-16 h-16 text-pink-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
@@ -22,10 +22,10 @@
       </div>
     </div>
 
-    <!-- Estadísticas mejoradas -->
+    <!-- Estadísticas optimizadas -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
       <!-- Total -->
-      <div class="group bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-pink-100">
+      <div class="group bg-white/95 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-pink-100">
         <div class="flex items-center justify-between mb-2">
           <div class="text-4xl">🌍</div>
           <div class="text-4xl font-black text-pink-500">{{ lugares.length }}</div>
@@ -34,7 +34,7 @@
       </div>
       
       <!-- Por Visitar -->
-      <div class="group bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-orange-100">
+      <div class="group bg-white/95 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-orange-100">
         <div class="flex items-center justify-between mb-2">
           <div class="text-4xl">🎯</div>
           <div class="text-4xl font-black text-orange-500">{{ lugaresPendientes }}</div>
@@ -43,7 +43,7 @@
       </div>
       
       <!-- Visitados -->
-      <div class="group bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-green-100">
+      <div class="group bg-white/95 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-green-100">
         <div class="flex items-center justify-between mb-2">
           <div class="text-4xl">✅</div>
           <div class="text-4xl font-black text-green-500">{{ lugaresVisitados }}</div>
@@ -68,14 +68,14 @@
       </button>
     </div>
 
-    <!-- Filtros por estado mejorados -->
+    <!-- Filtros por estado optimizados -->
     <div class="flex flex-wrap justify-center gap-3 mb-6">
       <button 
         (click)="cambiarEstado('Todos')" 
         [ngClass]="estadoSeleccionado === 'Todos' 
-          ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-105' 
-          : 'bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-md'" 
-        class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 border border-pink-200"
+          ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg' 
+          : 'bg-white/90 text-gray-700 hover:bg-white hover:shadow-md'" 
+        class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300 border border-pink-200"
       >
         <span class="flex items-center gap-2">
           <span class="text-lg">🌍</span>
@@ -86,9 +86,9 @@
       <button 
         (click)="cambiarEstado('Por Visitar')" 
         [ngClass]="estadoSeleccionado === 'Por Visitar' 
-          ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white shadow-lg scale-105' 
-          : 'bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-md'" 
-        class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 border border-orange-200"
+          ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white shadow-lg' 
+          : 'bg-white/90 text-gray-700 hover:bg-white hover:shadow-md'" 
+        class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300 border border-orange-200"
       >
         <span class="flex items-center gap-2">
           <span class="text-lg">🎯</span>
@@ -99,9 +99,9 @@
       <button 
         (click)="cambiarEstado('Visitados')" 
         [ngClass]="estadoSeleccionado === 'Visitados' 
-          ? 'bg-gradient-to-r from-green-400 to-emerald-400 text-white shadow-lg scale-105' 
-          : 'bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-md'" 
-        class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 border border-green-200"
+          ? 'bg-gradient-to-r from-green-400 to-emerald-400 text-white shadow-lg' 
+          : 'bg-white/90 text-gray-700 hover:bg-white hover:shadow-md'" 
+        class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300 border border-green-200"
       >
         <span class="flex items-center gap-2">
           <span class="text-lg">✅</span>
@@ -110,15 +110,15 @@
       </button>
     </div>
 
-    <!-- Filtros por categoría mejorados -->
+    <!-- Filtros por categoría optimizados -->
     <div class="flex flex-wrap justify-center gap-2 mb-8">
       @for (categoria of categoriasUnicas; track categoria) {
         <button 
           (click)="cambiarCategoria(categoria)" 
           [ngClass]="categoriaSeleccionada === categoria 
-            ? 'bg-pink-500 text-white shadow-md scale-105' 
-            : 'bg-white/70 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-sm'" 
-          class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 transform hover:scale-105 border border-pink-100"
+            ? 'bg-pink-500 text-white shadow-md' 
+            : 'bg-white/90 text-gray-700 hover:bg-white hover:shadow-sm'" 
+          class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border border-pink-100"
         >
           <span class="flex items-center gap-1.5">
             <span>{{ getCategoriaEmoji(categoria) }}</span>
@@ -128,11 +128,11 @@
       }
     </div>
 
-    <!-- Listado de lugares mejorado -->
+    <!-- Listado de lugares optimizado -->
     <div class="grid gap-5 pb-8">
       @for (lugar of lugaresFiltrados; track lugar.id) {
         <div 
-          class="group bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
+          class="group bg-white/95 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100"
           [ngClass]="{ 'opacity-75': lugar.visitado }"
         >
           <div class="p-5 sm:p-6">
@@ -219,9 +219,9 @@
           </div>
         </div>
       } @empty {
-        <!-- Estado vacío mejorado -->
-        <div class="text-center py-16 bg-white/95 backdrop-blur-md rounded-3xl shadow-xl">
-          <div class="text-8xl mb-6 animate-bounce">✨</div>
+        <!-- Estado vacío optimizado -->
+        <div class="text-center py-16 bg-white/95 rounded-3xl shadow-xl">
+          <div class="text-8xl mb-6">✨</div>
           <h3 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">
             {{ estadoSeleccionado === 'Todos' ? 'Tu lista de sueños está vacía' : 'No hay lugares en este filtro' }}
           </h3>
