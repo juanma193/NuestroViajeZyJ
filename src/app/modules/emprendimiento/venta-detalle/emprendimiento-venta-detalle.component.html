@@ -1,0 +1,249 @@
+<div class="max-w-6xl mx-auto p-6">
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+    <div>
+      <a routerLink="/emprendimiento/ventas" class="text-sm font-semibold text-pink-600">
+        Volver a ventas
+      </a>
+      <h1 class="text-2xl font-bold text-pink-600 mt-2">Detalle de venta</h1>
+      <p class="text-gray-600">
+        {{ venta?.cliente_nombre || 'Cliente sin nombre' }} · {{ formatFecha(venta?.fecha) }}
+      </p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-2">
+      <button
+        class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 font-semibold disabled:opacity-50"
+        (click)="abrirAgregarProducto()"
+        [disabled]="cargando || bloqueada"
+        type="button"
+      >
+        Agregar producto
+      </button>
+      <button
+        class="bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full px-5 py-2 font-semibold disabled:opacity-50"
+        (click)="confirmarVenta()"
+        [disabled]="cargando || !puedeConfirmar"
+        type="button"
+      >
+        Confirmar venta
+      </button>
+      <button
+        class="rounded-full px-5 py-2 font-semibold border bg-white disabled:opacity-50"
+        (click)="cancelarVenta()"
+        [disabled]="cargando || venta?.estado === 'cancelado'"
+        type="button"
+      >
+        Cancelar venta
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+    <div class="rounded-2xl bg-white px-5 py-4 font-semibold text-pink-600 shadow">
+      Cargando...
+    </div>
+  </div>
+
+  <div *ngIf="venta as v" class="mt-6 space-y-6">
+    <div class="bg-white border border-pink-200 rounded-2xl shadow p-5">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs px-2 py-0.5 rounded-full font-extrabold" [ngClass]="getEstadoVentaClass(v.estado)">
+              {{ getEstadoVentaLabel(v.estado) }}
+            </span>
+            <span
+              class="text-xs px-2 py-0.5 rounded-full font-extrabold"
+              [ngClass]="v.stock_descontado ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-800'"
+            >
+              {{ v.stock_descontado ? 'Stock descontado' : 'Stock pendiente' }}
+            </span>
+          </div>
+          <h2 class="mt-2 text-lg font-bold text-gray-900">{{ v.cliente_nombre || 'Cliente sin nombre' }}</h2>
+          <p class="text-sm text-gray-600">
+            {{ formatFecha(v.fecha) }} · {{ v.canal_venta || 'Sin canal' }} ·
+            {{ v.medio_pago || 'Sin medio' }}
+          </p>
+          <p *ngIf="v.observaciones" class="mt-2 text-sm text-gray-600">{{ v.observaciones }}</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button class="px-4 py-2 rounded-xl border font-semibold" (click)="editandoCabecera = !editandoCabecera" type="button">
+            Editar cabecera
+          </button>
+          <select
+            class="px-3 py-2 rounded-xl border border-gray-200 text-sm font-semibold"
+            [ngModel]="v.estado"
+            (ngModelChange)="cambiarEstado($event)"
+            [disabled]="cargando"
+          >
+            <option *ngFor="let e of estados" [ngValue]="e">{{ getEstadoVentaLabel(e) }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div
+        *ngIf="editandoCabecera"
+        class="mt-5 border-t border-pink-100 pt-5 grid grid-cols-1 sm:grid-cols-2 gap-4"
+      >
+        <div>
+          <label class="text-sm font-semibold text-gray-700">Cliente</label>
+          <input class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200" [(ngModel)]="formCabecera.cliente_nombre" type="text" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold text-gray-700">Fecha *</label>
+          <input class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200" [(ngModel)]="formCabecera.fecha" type="date" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold text-gray-700">Canal</label>
+          <select class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200" [(ngModel)]="formCabecera.canal_venta">
+            <option value="">Sin canal</option>
+            <option *ngFor="let c of canales" [value]="c">{{ c }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-semibold text-gray-700">Medio de pago</label>
+          <select class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200" [(ngModel)]="formCabecera.medio_pago">
+            <option value="">Sin medio</option>
+            <option *ngFor="let m of mediosPago" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-semibold text-gray-700">Descuento</label>
+          <input class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200" [(ngModel)]="formCabecera.descuento" appNonNegativeNumber type="number" min="0" step="0.01" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold text-gray-700">Recargo</label>
+          <input class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200" [(ngModel)]="formCabecera.recargo" appNonNegativeNumber type="number" min="0" step="0.01" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold text-gray-700">Envío</label>
+          <input class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200" [(ngModel)]="formCabecera.envio" appNonNegativeNumber type="number" min="0" step="0.01" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="text-sm font-semibold text-gray-700">Observaciones</label>
+          <textarea class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200" [(ngModel)]="formCabecera.observaciones" rows="3"></textarea>
+        </div>
+        <div class="sm:col-span-2 flex flex-col sm:flex-row gap-3">
+          <button class="bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl px-4 py-2 font-semibold disabled:opacity-50" (click)="guardarCabecera()" [disabled]="cargando" type="button">
+            Guardar
+          </button>
+          <button class="px-4 py-2 rounded-xl border" (click)="editandoCabecera = false; cargarFormCabecera(v)" type="button">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-7 gap-3">
+      <div class="bg-white border border-pink-200 rounded-2xl p-4 shadow">
+        <div class="text-xs font-semibold text-gray-600">Subtotal</div>
+        <div class="font-extrabold text-gray-900">{{ formatMoney(v.subtotal) }}</div>
+      </div>
+      <div class="bg-white border border-pink-200 rounded-2xl p-4 shadow">
+        <div class="text-xs font-semibold text-gray-600">Descuento</div>
+        <div class="font-extrabold text-gray-900">{{ formatMoney(v.descuento) }}</div>
+      </div>
+      <div class="bg-white border border-pink-200 rounded-2xl p-4 shadow">
+        <div class="text-xs font-semibold text-gray-600">Recargo</div>
+        <div class="font-extrabold text-gray-900">{{ formatMoney(v.recargo) }}</div>
+      </div>
+      <div class="bg-white border border-pink-200 rounded-2xl p-4 shadow">
+        <div class="text-xs font-semibold text-gray-600">Envío</div>
+        <div class="font-extrabold text-gray-900">{{ formatMoney(v.envio) }}</div>
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 shadow">
+        <div class="text-xs font-semibold text-gray-600">Total</div>
+        <div class="font-extrabold text-gray-900">{{ formatMoney(v.total) }}</div>
+      </div>
+      <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 shadow">
+        <div class="text-xs font-semibold text-gray-600">Costo</div>
+        <div class="font-extrabold text-gray-900">{{ formatMoney(v.costo_total) }}</div>
+      </div>
+      <div class="bg-green-50 border border-green-200 rounded-2xl p-4 shadow">
+        <div class="text-xs font-semibold text-gray-600">Ganancia</div>
+        <div class="font-extrabold text-gray-900">{{ formatMoney(v.ganancia_estimada) }}</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="text-lg font-bold text-gray-900">Productos</h2>
+        <button
+          class="px-4 py-2 rounded-xl border border-pink-200 bg-pink-50 text-pink-700 font-semibold disabled:opacity-50"
+          (click)="abrirAgregarProducto()"
+          [disabled]="bloqueada"
+          type="button"
+        >
+          Agregar producto
+        </button>
+      </div>
+
+      <div
+        *ngIf="detalles.length === 0"
+        class="mt-3 bg-white border border-pink-100 rounded-2xl p-6 text-center text-gray-500"
+      >
+        Todavía no agregaste productos a esta venta
+      </div>
+
+      <div class="mt-3 grid grid-cols-1 gap-3">
+        <div *ngFor="let d of detalles" class="bg-white border border-pink-200 rounded-2xl shadow p-4">
+          <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+            <div class="min-w-0">
+              <h3 class="font-bold text-gray-900 truncate">{{ d.producto?.nombre || 'Producto' }}</h3>
+              <p class="text-sm text-gray-600 mt-1">
+                {{ d.cantidad }} x {{ formatMoney(d.precio_unitario) }} · total {{ formatMoney(d.precio_total) }}
+              </p>
+              <p class="text-sm text-gray-600">
+                Costo {{ formatMoney(d.costo_total) }} · ganancia {{ formatMoney(gananciaLinea(d)) }}
+              </p>
+              <p *ngIf="d.observaciones" class="text-sm text-gray-600 mt-2">{{ d.observaciones }}</p>
+            </div>
+            <button
+              *ngIf="!bloqueada"
+              class="px-3 py-2 rounded-xl border font-semibold"
+              (click)="eliminarDetalle(d)"
+              type="button"
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-lg font-bold text-gray-900">Movimientos de stock generados</h2>
+      <div
+        *ngIf="movimientos.length === 0"
+        class="mt-3 bg-white border border-pink-100 rounded-2xl p-6 text-center text-gray-500"
+      >
+        Todavía no hay movimientos asociados a esta venta
+      </div>
+
+      <div class="mt-3 grid grid-cols-1 gap-3">
+        <div *ngFor="let m of movimientos" class="bg-white border border-pink-200 rounded-2xl shadow p-4">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+            <div>
+              <div class="text-xs font-semibold text-gray-500">{{ formatFecha(m.created_at, true) }}</div>
+              <div class="font-bold text-gray-900">
+                {{ m.material?.nombre || 'Material' }} · {{ m.tipo }} {{ m.cantidad }} {{ m.unidad }}
+              </div>
+              <div class="text-sm text-gray-600">
+                Stock: {{ m.stock_anterior }} a {{ m.stock_nuevo }}
+              </div>
+            </div>
+            <div class="text-sm font-semibold text-pink-700">{{ m.motivo }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-agregar-producto-venta-modal
+    *ngIf="mostrandoAgregarProducto && venta"
+    [venta]="venta"
+    (cerrar)="cerrarAgregarProducto()"
+    (agregado)="cargar()"
+  ></app-agregar-producto-venta-modal>
+</div>

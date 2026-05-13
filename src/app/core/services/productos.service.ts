@@ -6,6 +6,7 @@ import type { Producto } from '../models/producto.model';
 export interface ListarProductosParams {
   buscar?: string;
   incluir_inactivos?: boolean;
+  pareja_id?: string;
 }
 
 @Injectable({
@@ -35,15 +36,15 @@ export class ProductosService {
     return { payload: next, removed: column };
   }
 
-  private async requireParejaId(): Promise<string> {
-    const parejaId = await this.parejasService.getParejaIdActual();
-    if (!parejaId) throw new Error('No se encontró una pareja activa.');
-    return parejaId;
+  private async requireParejaId(parejaId?: string): Promise<string> {
+    const id = parejaId ?? (await this.parejasService.getParejaIdActual());
+    if (!id) throw new Error('No se encontró una pareja activa.');
+    return id;
   }
 
   async listar(params: ListarProductosParams = {}): Promise<Producto[]> {
     try {
-      const parejaId = await this.requireParejaId();
+      const parejaId = await this.requireParejaId(params.pareja_id);
       let q = this.supabase.supabase
         .from(this.table)
         .select('*')
@@ -72,14 +73,14 @@ export class ProductosService {
     }
   }
 
-  async obtenerPorId(id: number): Promise<Producto | null> {
+  async obtenerPorId(id: number, parejaId?: string): Promise<Producto | null> {
     try {
-      const parejaId = await this.requireParejaId();
+      const pid = await this.requireParejaId(parejaId);
       const { data, error } = await this.supabase.supabase
         .from(this.table)
         .select('*')
         .eq('id', id)
-        .eq('pareja_id', parejaId)
+        .eq('pareja_id', pid)
         .single();
 
       if (error) {
@@ -92,6 +93,14 @@ export class ProductosService {
       console.error('Error obteniendo producto:', e);
       return null;
     }
+  }
+
+  async getProductosActivos(parejaId?: string): Promise<Producto[]> {
+    return this.listar({ incluir_inactivos: false, pareja_id: parejaId });
+  }
+
+  async getProductoById(id: number, parejaId?: string): Promise<Producto | null> {
+    return this.obtenerPorId(id, parejaId);
   }
 
   async crear(payload: Omit<Producto, 'id' | 'pareja_id'>): Promise<Producto | null> {

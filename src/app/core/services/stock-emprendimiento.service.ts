@@ -106,6 +106,28 @@ export class StockEmprendimientoService {
     }
   }
 
+  async getMovimientosByVenta(ventaId: number, parejaId?: string): Promise<MovimientoStock[]> {
+    try {
+      const pid = await this.requireParejaId(parejaId);
+      const { data, error } = await this.supabase.supabase
+        .from(this.movimientosTable)
+        .select('*, material:materiales(id,nombre,unidad_base)')
+        .eq('pareja_id', pid)
+        .eq('venta_id', ventaId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error listando movimientos por venta:', error);
+        return [];
+      }
+
+      return (data as MovimientoStock[]) ?? [];
+    } catch (e) {
+      console.error('Error listando movimientos por venta:', e);
+      return [];
+    }
+  }
+
   async registrarMovimientoStockDetailed(
     payload: RegistrarMovimientoStockPayload,
     parejaId?: string,

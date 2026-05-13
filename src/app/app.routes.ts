@@ -73,6 +73,30 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'emprendimiento/ventas/:id',
+    canActivate: [authGuard, pairGuard],
+    loadComponent: () =>
+      import('./modules/emprendimiento/venta-detalle/emprendimiento-venta-detalle.component').then(
+        (m) => m.EmprendimientoVentaDetalleComponent,
+      ),
+  },
+  {
+    path: 'emprendimiento/ventas',
+    canActivate: [authGuard, pairGuard],
+    loadComponent: () =>
+      import('./modules/emprendimiento/ventas/emprendimiento-ventas.component').then(
+        (m) => m.EmprendimientoVentasComponent,
+      ),
+  },
+  {
+    path: 'emprendimiento/clientes',
+    canActivate: [authGuard, pairGuard],
+    loadComponent: () =>
+      import('./modules/emprendimiento/clientes/emprendimiento-clientes.component').then(
+        (m) => m.EmprendimientoClientesComponent,
+      ),
+  },
+  {
     path: 'inicio',
     canActivate: [authGuard, pairGuard],
     loadComponent: () => import('./modules/inicio/inicio.component').then((m) => m.InicioComponent),
