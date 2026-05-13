@@ -1,0 +1,167 @@
+<div class="max-w-5xl mx-auto p-6">
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-pink-600">Compras</h1>
+      <p class="text-gray-600">Cargá compras de materiales y sumá stock con historial</p>
+    </div>
+
+    <button
+      class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+      (click)="abrirNueva()"
+      [disabled]="cargando"
+      type="button"
+    >
+      Nueva compra
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+    <div class="rounded-2xl bg-white px-5 py-4 font-semibold text-pink-600 shadow">
+      Cargando...
+    </div>
+  </div>
+
+  <div class="mt-6 bg-white rounded-2xl border border-pink-200 shadow p-4">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="sm:col-span-2">
+        <label class="text-sm font-semibold text-gray-700">Buscar</label>
+        <input
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="buscar"
+          placeholder="Proveedor u observación"
+          type="text"
+        />
+      </div>
+
+      <div class="flex items-end">
+        <label class="inline-flex items-center gap-2 text-sm font-semibold text-gray-700">
+          <input type="checkbox" [(ngModel)]="mostrarInactivas" class="w-4 h-4" />
+          Mostrar inactivas
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div
+    *ngIf="mostrandoFormulario"
+    class="mt-6 bg-white rounded-2xl border border-pink-200 shadow p-5"
+  >
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h2 class="text-lg font-bold text-pink-600">Nueva compra</h2>
+        <p class="text-sm text-gray-600">Después vas a poder agregar los materiales comprados</p>
+      </div>
+      <button class="px-3 py-2 rounded-xl border" (click)="cerrarFormulario()" type="button">
+        Cerrar
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+      <div>
+        <label class="text-sm font-semibold text-gray-700">Fecha *</label>
+        <input
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.fecha"
+          type="date"
+        />
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold text-gray-700">Proveedor</label>
+        <select
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.proveedor_id"
+        >
+          <option [ngValue]="null">Sin proveedor guardado</option>
+          <option *ngFor="let p of proveedoresActivos" [ngValue]="p.id">{{ p.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="sm:col-span-2" *ngIf="!form.proveedor_id">
+        <label class="text-sm font-semibold text-gray-700">Proveedor externo</label>
+        <input
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.proveedor_nombre"
+          placeholder="Nombre opcional"
+          type="text"
+        />
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="text-sm font-semibold text-gray-700">Observaciones</label>
+        <textarea
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.observaciones"
+          rows="3"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="mt-5 flex flex-col sm:flex-row gap-3">
+      <button
+        class="bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl px-4 py-2 font-semibold disabled:opacity-50"
+        (click)="crearCompra()"
+        [disabled]="cargando"
+        type="button"
+      >
+        Crear compra
+      </button>
+      <button class="px-4 py-2 rounded-xl border" (click)="cerrarFormulario()" type="button">
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 gap-4">
+    <div
+      *ngIf="!cargando && comprasFiltradas.length === 0"
+      class="bg-white border border-pink-100 rounded-2xl p-6 text-center text-gray-500"
+    >
+      No hay compras para mostrar
+    </div>
+
+    <div
+      *ngFor="let c of comprasFiltradas"
+      class="bg-white rounded-2xl shadow border border-pink-200 p-4"
+    >
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-gray-900 truncate">
+              {{ c.proveedor_nombre || 'Compra sin proveedor' }}
+            </h3>
+            <span
+              *ngIf="!(c.activo ?? true)"
+              class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-extrabold"
+            >
+              Inactiva
+            </span>
+          </div>
+          <p class="text-sm text-gray-600 mt-1">{{ formatFecha(c.fecha) }}</p>
+          <p *ngIf="c.observaciones" class="text-sm text-gray-600 mt-2">{{ c.observaciones }}</p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2">
+          <div class="bg-amber-50 border border-amber-100 rounded-xl px-4 py-2">
+            <div class="text-xs font-semibold text-gray-600">Total</div>
+            <div class="font-extrabold text-gray-900">{{ c.total | number: '1.0-2' }}</div>
+          </div>
+          <a
+            class="px-4 py-3 rounded-xl border border-pink-200 bg-pink-50 text-pink-700 text-center font-semibold"
+            [routerLink]="['/emprendimiento/compras', c.id]"
+          >
+            Ver detalle
+          </a>
+          <button
+            *ngIf="c.activo ?? true"
+            class="px-4 py-3 rounded-xl border text-gray-700 font-semibold"
+            (click)="desactivarCompra(c)"
+            type="button"
+          >
+            Desactivar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

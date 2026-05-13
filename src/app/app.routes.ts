@@ -41,6 +41,38 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'emprendimiento/stock-bajo',
+    canActivate: [authGuard, pairGuard],
+    loadComponent: () =>
+      import('./modules/emprendimiento/stock-bajo/emprendimiento-stock-bajo.component').then(
+        (m) => m.EmprendimientoStockBajoComponent,
+      ),
+  },
+  {
+    path: 'emprendimiento/compras/:id',
+    canActivate: [authGuard, pairGuard],
+    loadComponent: () =>
+      import('./modules/emprendimiento/compra-detalle/emprendimiento-compra-detalle.component').then(
+        (m) => m.EmprendimientoCompraDetalleComponent,
+      ),
+  },
+  {
+    path: 'emprendimiento/compras',
+    canActivate: [authGuard, pairGuard],
+    loadComponent: () =>
+      import('./modules/emprendimiento/compras/emprendimiento-compras.component').then(
+        (m) => m.EmprendimientoComprasComponent,
+      ),
+  },
+  {
+    path: 'emprendimiento/proveedores',
+    canActivate: [authGuard, pairGuard],
+    loadComponent: () =>
+      import('./modules/emprendimiento/proveedores/emprendimiento-proveedores.component').then(
+        (m) => m.EmprendimientoProveedoresComponent,
+      ),
+  },
+  {
     path: 'inicio',
     canActivate: [authGuard, pairGuard],
     loadComponent: () => import('./modules/inicio/inicio.component').then((m) => m.InicioComponent),

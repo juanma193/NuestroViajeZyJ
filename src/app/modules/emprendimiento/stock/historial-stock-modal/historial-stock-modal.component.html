@@ -1,0 +1,56 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" (click)="onCerrar()">
+  <div
+    class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="sticky top-0 bg-gradient-to-r from-pink-500 to-rose-500 text-white p-6 rounded-t-2xl">
+      <h2 class="text-2xl font-bold">📜 Historial de stock</h2>
+      <p class="text-sm text-white/90 mt-1">{{ material.nombre }}</p>
+    </div>
+
+    <div class="p-6">
+      <div *ngIf="cargando" class="text-center text-gray-600 font-semibold py-10">Cargando...</div>
+
+      <div *ngIf="!cargando && movimientos.length === 0" class="text-center text-gray-500 py-10">
+        No hay movimientos para mostrar
+      </div>
+
+      <div *ngIf="!cargando && movimientos.length > 0" class="space-y-3">
+        <div *ngFor="let m of movimientos" class="border border-gray-200 rounded-2xl p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="text-xs font-semibold text-gray-500">{{ formatFecha(m.created_at) }}</div>
+              <div class="mt-1 flex items-center gap-2">
+                <span class="text-xs px-2 py-0.5 rounded-full font-extrabold" [ngClass]="badgeClass(m.tipo)">
+                  {{ tipoLabel(m.tipo) }}
+                </span>
+                <span class="text-sm font-extrabold text-gray-900">
+                  {{ m.cantidad }} {{ m.unidad }}
+                </span>
+              </div>
+              <div class="text-sm text-gray-600 mt-1">
+                Stock: {{ m.stock_anterior ?? '—' }} → {{ m.stock_nuevo ?? '—' }}
+              </div>
+              <div class="text-sm text-gray-700 mt-2">
+                <span class="font-semibold">Motivo:</span> {{ m.motivo }}
+              </div>
+              <div *ngIf="m.observaciones" class="text-sm text-gray-600 mt-1">
+                <span class="font-semibold">Obs:</span> {{ m.observaciones }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sticky bottom-0 bg-gray-50 p-6 rounded-b-2xl flex gap-3">
+      <button
+        type="button"
+        (click)="onCerrar()"
+        class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+      >
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>

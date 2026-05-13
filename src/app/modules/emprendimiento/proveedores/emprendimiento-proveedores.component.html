@@ -1,0 +1,187 @@
+<div class="max-w-5xl mx-auto p-6">
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-pink-600">Proveedores</h1>
+      <p class="text-gray-600">Contactos y notas para tus compras de materiales</p>
+    </div>
+
+    <button
+      class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+      (click)="abrirNuevo()"
+      [disabled]="cargando"
+      type="button"
+    >
+      Nuevo proveedor
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+    <div class="rounded-2xl bg-white px-5 py-4 font-semibold text-pink-600 shadow">
+      Cargando...
+    </div>
+  </div>
+
+  <div class="mt-6 bg-white rounded-2xl border border-pink-200 shadow p-4">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="sm:col-span-2">
+        <label class="text-sm font-semibold text-gray-700">Buscar</label>
+        <input
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="buscar"
+          placeholder="Nombre del proveedor"
+          type="text"
+        />
+      </div>
+
+      <div class="flex items-end">
+        <label class="inline-flex items-center gap-2 text-sm font-semibold text-gray-700">
+          <input type="checkbox" [(ngModel)]="mostrarInactivos" class="w-4 h-4" />
+          Mostrar inactivos
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div
+    #formularioProveedor
+    *ngIf="mostrandoFormulario"
+    class="mt-6 scroll-mt-36 bg-white rounded-2xl border border-pink-200 shadow p-5"
+  >
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h2 class="text-lg font-bold text-pink-600">
+          {{ editandoId ? 'Editar proveedor' : 'Nuevo proveedor' }}
+        </h2>
+        <p class="text-sm text-gray-600">El nombre es el único dato obligatorio</p>
+      </div>
+      <button class="px-3 py-2 rounded-xl border" (click)="cerrarFormulario()" type="button">
+        Cerrar
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+      <div class="sm:col-span-2">
+        <label class="text-sm font-semibold text-gray-700">Nombre *</label>
+        <input
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.nombre"
+          type="text"
+        />
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold text-gray-700">Teléfono</label>
+        <input
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.telefono"
+          type="text"
+        />
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold text-gray-700">Instagram</label>
+        <input
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.instagram"
+          placeholder="@proveedor"
+          type="text"
+        />
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="text-sm font-semibold text-gray-700">Dirección</label>
+        <input
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.direccion"
+          type="text"
+        />
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="text-sm font-semibold text-gray-700">Notas</label>
+        <textarea
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.notas"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div>
+        <label class="inline-flex items-center gap-2 text-sm font-semibold text-gray-700">
+          <input type="checkbox" [(ngModel)]="form.activo" class="w-4 h-4" />
+          Activo
+        </label>
+      </div>
+    </div>
+
+    <div class="mt-5 flex flex-col sm:flex-row gap-3">
+      <button
+        class="bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl px-4 py-2 font-semibold disabled:opacity-50"
+        (click)="guardar()"
+        [disabled]="cargando"
+        type="button"
+      >
+        Guardar proveedor
+      </button>
+      <button class="px-4 py-2 rounded-xl border" (click)="cerrarFormulario()" type="button">
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 gap-4">
+    <div
+      *ngIf="!cargando && proveedoresFiltrados.length === 0"
+      class="bg-white border border-pink-100 rounded-2xl p-6 text-center text-gray-500"
+    >
+      No hay proveedores para mostrar
+    </div>
+
+    <div
+      *ngFor="let p of proveedoresFiltrados"
+      class="bg-white rounded-2xl shadow border border-pink-200 p-4"
+    >
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-gray-900 truncate">{{ p.nombre }}</h3>
+            <span
+              class="text-xs px-2 py-0.5 rounded-full font-extrabold"
+              [ngClass]="(p.activo ?? true) ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'"
+            >
+              {{ (p.activo ?? true) ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+
+          <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+            <div class="bg-rose-50 border border-rose-100 rounded-xl p-3">
+              <div class="text-xs font-semibold text-gray-600">Teléfono</div>
+              <div class="font-bold text-gray-900 truncate">{{ p.telefono || '-' }}</div>
+            </div>
+            <div class="bg-amber-50 border border-amber-100 rounded-xl p-3">
+              <div class="text-xs font-semibold text-gray-600">Instagram</div>
+              <div class="font-bold text-gray-900 truncate">{{ p.instagram || '-' }}</div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-3">
+              <div class="text-xs font-semibold text-gray-600">Dirección</div>
+              <div class="font-bold text-gray-900 truncate">{{ p.direccion || '-' }}</div>
+            </div>
+          </div>
+
+          <p *ngIf="p.notas" class="mt-3 text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
+            {{ p.notas }}
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2 shrink-0">
+          <button class="px-3 py-2 rounded-xl border" (click)="abrirEditar(p)" type="button">
+            Editar
+          </button>
+          <button class="px-3 py-2 rounded-xl border" (click)="toggleActivo(p)" type="button">
+            {{ (p.activo ?? true) ? 'Desactivar' : 'Activar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

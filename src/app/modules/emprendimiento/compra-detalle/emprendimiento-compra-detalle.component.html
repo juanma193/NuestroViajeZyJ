@@ -1,0 +1,232 @@
+<div class="max-w-5xl mx-auto p-6">
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+    <div>
+      <a routerLink="/emprendimiento/compras" class="text-sm font-semibold text-pink-600">
+        Volver a compras
+      </a>
+      <h1 class="text-2xl font-bold text-pink-600 mt-2">Detalle de compra</h1>
+      <p class="text-gray-600">
+        {{ compra?.proveedor_nombre || 'Compra sin proveedor' }} ·
+        {{ formatFecha(compra?.fecha) }}
+      </p>
+    </div>
+
+    <button
+      class="bg-gradient-to-br from-pink-200 to-amber-100 text-gray-800 rounded-full px-5 py-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+      (click)="abrirAgregarDetalle()"
+      [disabled]="cargando || !(compra?.activo ?? true)"
+      type="button"
+    >
+      Agregar material
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+    <div class="rounded-2xl bg-white px-5 py-4 font-semibold text-pink-600 shadow">
+      Cargando...
+    </div>
+  </div>
+
+  <div *ngIf="compra" class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div class="bg-white border border-pink-200 rounded-2xl p-4 shadow">
+      <div class="text-xs font-semibold text-gray-600">Proveedor</div>
+      <div class="font-extrabold text-gray-900">{{ compra.proveedor_nombre || '-' }}</div>
+    </div>
+    <div class="bg-white border border-pink-200 rounded-2xl p-4 shadow">
+      <div class="text-xs font-semibold text-gray-600">Fecha</div>
+      <div class="font-extrabold text-gray-900">{{ formatFecha(compra.fecha) }}</div>
+    </div>
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 shadow">
+      <div class="text-xs font-semibold text-gray-600">Total</div>
+      <div class="font-extrabold text-gray-900">{{ compra.total | number: '1.0-2' }}</div>
+    </div>
+  </div>
+
+  <p
+    *ngIf="compra?.observaciones"
+    class="mt-4 bg-white border border-gray-200 rounded-2xl p-4 text-sm text-gray-600"
+  >
+    {{ compra?.observaciones }}
+  </p>
+
+  <div
+    *ngIf="mostrandoDetalleForm"
+    class="mt-6 bg-white rounded-2xl border border-pink-200 shadow p-5"
+  >
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h2 class="text-lg font-bold text-pink-600">Agregar material</h2>
+        <p class="text-sm text-gray-600">Al confirmar se registra un movimiento tipo compra</p>
+      </div>
+      <button class="px-3 py-2 rounded-xl border" (click)="cerrarAgregarDetalle()" type="button">
+        Cerrar
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+      <div class="sm:col-span-2">
+        <label class="text-sm font-semibold text-gray-700">Material *</label>
+        <select
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.material_id"
+          (ngModelChange)="onMaterialChange()"
+        >
+          <option [ngValue]="null">Seleccionar material</option>
+          <option *ngFor="let m of materialesActivos" [ngValue]="m.id">
+            {{ m.nombre }} · stock {{ m.stock_actual }} {{ m.unidad_base }}
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold text-gray-700">Cantidad *</label>
+        <input
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.cantidad"
+          appNonNegativeNumber
+          type="number"
+          min="0"
+          step="0.01"
+        />
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold text-gray-700">Unidad *</label>
+        <select
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.unidad"
+        >
+          <option *ngFor="let u of unidadesPara(materialSeleccionado)" [ngValue]="u">{{ u }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold text-gray-700">Precio total *</label>
+        <input
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.precio_total"
+          appNonNegativeNumber
+          type="number"
+          min="0"
+          step="0.01"
+        />
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold text-gray-700">Costo unitario</label>
+        <div class="mt-1 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 font-bold text-gray-900">
+          {{ costoUnitarioPreview == null ? '-' : (costoUnitarioPreview | number: '1.2-4') }}
+          <span *ngIf="materialSeleccionado">por {{ materialSeleccionado.unidad_base }}</span>
+        </div>
+      </div>
+
+      <div class="sm:col-span-2" *ngIf="cantidadConvertidaPreview != null && materialSeleccionado">
+        <div class="bg-rose-50 border border-rose-100 rounded-xl p-3 text-sm text-gray-700">
+          Se sumarán
+          <span class="font-extrabold">
+            {{ cantidadConvertidaPreview | number: '1.0-2' }} {{ materialSeleccionado.unidad_base }}
+          </span>
+          al stock.
+        </div>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="text-sm font-semibold text-gray-700">Observaciones</label>
+        <textarea
+          class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="form.observaciones"
+          rows="3"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="mt-5 flex flex-col sm:flex-row gap-3">
+      <button
+        class="bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl px-4 py-2 font-semibold disabled:opacity-50"
+        (click)="agregarDetalle()"
+        [disabled]="cargando"
+        type="button"
+      >
+        Confirmar material
+      </button>
+      <button class="px-4 py-2 rounded-xl border" (click)="cerrarAgregarDetalle()" type="button">
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-6">
+    <h2 class="text-lg font-bold text-gray-900">Materiales comprados</h2>
+
+    <div
+      *ngIf="!cargando && detalles.length === 0"
+      class="mt-3 bg-white border border-pink-100 rounded-2xl p-6 text-center text-gray-500"
+    >
+      Todavía no agregaste materiales a esta compra
+    </div>
+
+    <div class="mt-3 grid grid-cols-1 gap-3">
+      <div
+        *ngFor="let d of detalles"
+        class="bg-white rounded-2xl shadow border border-pink-200 p-4"
+      >
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div class="min-w-0">
+            <h3 class="font-bold text-gray-900 truncate">
+              {{ d.material?.nombre || 'Material' }}
+            </h3>
+            <p class="text-sm text-gray-600 mt-1">
+              {{ d.cantidad }} {{ d.unidad }} · precio {{ d.precio_total | number: '1.0-2' }}
+            </p>
+            <p class="text-sm text-gray-600">
+              Costo unitario: {{ d.costo_unitario | number: '1.2-4' }}
+            </p>
+            <p *ngIf="d.observaciones" class="text-sm text-gray-600 mt-2">{{ d.observaciones }}</p>
+          </div>
+
+          <div
+            *ngIf="movimientoParaDetalle(d) as mov"
+            class="bg-green-50 border border-green-100 rounded-xl px-3 py-2 text-sm"
+          >
+            <div class="font-extrabold text-green-700">Movimiento creado</div>
+            <div class="text-gray-700">
+              +{{ mov.cantidad }} {{ mov.unidad }} · stock {{ mov.stock_anterior }} a
+              {{ mov.stock_nuevo }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6">
+    <h2 class="text-lg font-bold text-gray-900">Movimientos de esta compra</h2>
+
+    <div
+      *ngIf="!cargando && movimientos.length === 0"
+      class="mt-3 bg-white border border-pink-100 rounded-2xl p-6 text-center text-gray-500"
+    >
+      Todavía no hay movimientos asociados
+    </div>
+
+    <div class="mt-3 grid grid-cols-1 gap-3">
+      <div
+        *ngFor="let m of movimientos"
+        class="bg-white rounded-2xl shadow border border-pink-200 p-4"
+      >
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+          <div>
+            <div class="text-xs font-semibold text-gray-500">{{ formatFecha(m.created_at, true) }}</div>
+            <div class="font-bold text-gray-900">
+              {{ m.material?.nombre || 'Material' }} · +{{ m.cantidad }} {{ m.unidad }}
+            </div>
+            <div class="text-sm text-gray-600">
+              Stock: {{ m.stock_anterior }} a {{ m.stock_nuevo }}
+            </div>
+          </div>
+          <div class="text-sm font-semibold text-pink-700">{{ m.motivo }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

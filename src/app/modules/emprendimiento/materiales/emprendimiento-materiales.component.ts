@@ -7,12 +7,23 @@ import type { Material, UnidadCantidad, UnidadBaseUso } from '../../../core/mode
 import { CategoriasMaterialesService } from '../../../core/services/categorias-materiales.service';
 import { MaterialesService } from '../../../core/services/materiales.service';
 import { EmprendimientoCostosService } from '../../../core/services/emprendimiento-costos.service';
+import { StockEmprendimientoService } from '../../../core/services/stock-emprendimiento.service';
 import { NonNegativeNumberDirective } from '../../../core/directives/non-negative-number.directive';
+import { getCantidadFaltante, getEstadoStock } from '../../../core/services/emprendimiento-stock.helpers';
+import type { EstadoStock } from '../../../core/models/movimiento-stock.model';
+import { AjustarStockModalComponent } from '../stock/ajustar-stock-modal/ajustar-stock-modal.component';
+import { HistorialStockModalComponent } from '../stock/historial-stock-modal/historial-stock-modal.component';
 
 @Component({
   selector: 'app-emprendimiento-materiales',
   standalone: true,
-  imports: [CommonModule, FormsModule, NonNegativeNumberDirective],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NonNegativeNumberDirective,
+    AjustarStockModalComponent,
+    HistorialStockModalComponent,
+  ],
   templateUrl: './emprendimiento-materiales.component.html',
 })
 export class EmprendimientoMaterialesComponent implements OnInit {
@@ -24,6 +35,12 @@ export class EmprendimientoMaterialesComponent implements OnInit {
   buscar = '';
   categoriaFiltro: number | 'todas' = 'todas';
   mostrarInactivos = true;
+
+  estadoFiltro: 'todos' | EstadoStock = 'todos';
+  soloBajoStock = false;
+
+  materialAjuste: Material | null = null;
+  materialHistorial: Material | null = null;
 
   mostrandoFormulario = false;
   editandoId?: number;
@@ -47,6 +64,7 @@ export class EmprendimientoMaterialesComponent implements OnInit {
     private categoriasService: CategoriasMaterialesService,
     private materialesService: MaterialesService,
     private costos: EmprendimientoCostosService,
+    private stock: StockEmprendimientoService,
     private toast: ToastService,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -69,6 +87,10 @@ export class EmprendimientoMaterialesComponent implements OnInit {
       if (this.categoriaFiltro !== 'todas' && (m.categoria_id ?? null) !== this.categoriaFiltro)
         return false;
       if (buscar && !(m.nombre ?? '').toLowerCase().includes(buscar)) return false;
+
+      const estado = this.estadoStock(m);
+      if (this.estadoFiltro !== 'todos' && estado !== this.estadoFiltro) return false;
+      if (this.soloBajoStock && !(estado === 'bajo' || estado === 'sin_stock')) return false;
       return true;
     });
   }
@@ -213,7 +235,8 @@ export class EmprendimientoMaterialesComponent implements OnInit {
         unidad_compra: this.form.unidad_compra,
         cantidad_compra,
         precio_compra,
-        stock_actual,
+        // En Etapa 2 el stock se maneja por movimientos; acá se setea 0 y luego se registra ajuste/entrada.
+        stock_actual: this.editandoId ? undefined : 0,
         stock_minimo,
         proveedor: this.form.proveedor.trim() ? this.form.proveedor.trim() : null,
         observaciones: this.form.observaciones.trim() ? this.form.observaciones.trim() : null,
@@ -222,9 +245,19 @@ export class EmprendimientoMaterialesComponent implements OnInit {
 
       let res: Material | null = null;
       if (this.editandoId) {
-        res = await this.materialesService.actualizar(this.editandoId, payload as any);
+        // No enviamos stock_actual en edición (se ajusta desde movimientos).
+        const { stock_actual: _ignored, ...sinStock } = payload as any;
+        res = await this.materialesService.actualizar(this.editandoId, sinStock);
       } else {
         res = await this.materialesService.crear(payload as any);
+        if (res && stock_actual > 0) {
+          const stockOk = await this.stock.ajustarStockMaterial(res, stock_actual, 'Stock inicial');
+          if (!stockOk) {
+            this.toast.showError('Error', 'El material se creó, pero no se pudo registrar el stock inicial');
+            await this.cargar();
+            return;
+          }
+        }
       }
 
       if (!res) {
@@ -275,5 +308,50 @@ export class EmprendimientoMaterialesComponent implements OnInit {
     const a = Number(material.stock_actual ?? 0);
     const m = Number(material.stock_minimo ?? 0);
     return Number.isFinite(a) && Number.isFinite(m) && a <= m;
+  }
+
+  estadoStock(material: Material): EstadoStock {
+    return getEstadoStock(material);
+  }
+
+  textoEstado(material: Material): string {
+    const estado = this.estadoStock(material);
+    if (estado === 'disponible') return 'Disponible';
+    if (estado === 'bajo') return 'Stock bajo';
+    if (estado === 'sin_stock') return 'Sin stock';
+    return 'Inactivo';
+  }
+
+  claseBadgeEstado(material: Material): string {
+    const estado = this.estadoStock(material);
+    if (estado === 'disponible') return 'bg-green-100 text-green-700';
+    if (estado === 'bajo') return 'bg-amber-100 text-amber-800';
+    if (estado === 'sin_stock') return 'bg-rose-100 text-rose-700';
+    return 'bg-gray-100 text-gray-700';
+  }
+
+  claseBorde(material: Material): string {
+    const estado = this.estadoStock(material);
+    if (estado === 'sin_stock') return 'border-rose-200';
+    if (estado === 'bajo') return 'border-amber-200';
+    if (estado === 'inactivo') return 'border-gray-200';
+    return 'border-pink-200';
+  }
+
+  faltanteMinimo(material: Material): number {
+    return getCantidadFaltante(material);
+  }
+
+  abrirAjuste(material: Material) {
+    this.materialAjuste = material;
+  }
+
+  abrirHistorial(material: Material) {
+    this.materialHistorial = material;
+  }
+
+  cerrarModales() {
+    this.materialAjuste = null;
+    this.materialHistorial = null;
   }
 }

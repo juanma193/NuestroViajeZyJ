@@ -3,11 +3,14 @@ import { SupabaseService } from '../supabase';
 import { ParejasService } from './parejas.service';
 import type { Material } from '../models/material.model';
 import { EmprendimientoCostosService } from './emprendimiento-costos.service';
+import { getEstadoStock } from './emprendimiento-stock.helpers';
+import type { ResultadoStockMaterial } from '../models/movimiento-stock.model';
 
 export interface ListarMaterialesParams {
   categoria_id?: number | 'todas';
   buscar?: string;
   incluir_inactivos?: boolean;
+  pareja_id?: string;
 }
 
 @Injectable({
@@ -22,18 +25,18 @@ export class MaterialesService {
     private costos: EmprendimientoCostosService,
   ) {}
 
-  private async requireParejaId(): Promise<string> {
-    const parejaId = await this.parejasService.getParejaIdActual();
-    if (!parejaId) throw new Error('No se encontró una pareja activa.');
-    return parejaId;
+  private async requireParejaId(parejaId?: string): Promise<string> {
+    const id = parejaId ?? (await this.parejasService.getParejaIdActual());
+    if (!id) throw new Error('No se encontró una pareja activa.');
+    return id;
   }
 
   async listar(params: ListarMaterialesParams = {}): Promise<Material[]> {
     try {
-      const parejaId = await this.requireParejaId();
+      const parejaId = await this.requireParejaId(params.pareja_id);
       let q = this.supabase.supabase
         .from(this.table)
-        .select('*')
+        .select('*, proveedor_rel:proveedores_emprendimiento(*)')
         .eq('pareja_id', parejaId)
         .order('nombre', { ascending: true });
 
@@ -63,14 +66,14 @@ export class MaterialesService {
     }
   }
 
-  async obtenerPorId(id: number): Promise<Material | null> {
+  async obtenerPorId(id: number, parejaId?: string): Promise<Material | null> {
     try {
-      const parejaId = await this.requireParejaId();
+      const pid = await this.requireParejaId(parejaId);
       const { data, error } = await this.supabase.supabase
         .from(this.table)
-        .select('*')
+        .select('*, proveedor_rel:proveedores_emprendimiento(*)')
         .eq('id', id)
-        .eq('pareja_id', parejaId)
+        .eq('pareja_id', pid)
         .single();
 
       if (error) {
@@ -82,6 +85,46 @@ export class MaterialesService {
     } catch (e) {
       console.error('Error obteniendo material:', e);
       return null;
+    }
+  }
+
+  async getMaterialById(id: number, parejaId?: string): Promise<Material | null> {
+    return this.obtenerPorId(id, parejaId);
+  }
+
+  async refreshMaterial(id: number): Promise<Material | null> {
+    return this.obtenerPorId(id);
+  }
+
+  async getMaterialesBajoStock(parejaId?: string): Promise<Material[]> {
+    try {
+      const mats = await this.listar({ incluir_inactivos: true, pareja_id: parejaId });
+      return (mats ?? []).filter((m) => {
+        if (!(m.activo ?? true)) return false;
+        const stock = Number(m.stock_actual ?? 0);
+        const minimo = Number(m.stock_minimo ?? 0);
+        return Number.isFinite(stock) && Number.isFinite(minimo) && stock <= minimo;
+      });
+    } catch (e) {
+      console.error('Error listando materiales bajo stock:', e);
+      return [];
+    }
+  }
+
+  async getMaterialesConEstadoStock(parejaId?: string): Promise<ResultadoStockMaterial[]> {
+    try {
+      const mats = await this.listar({ incluir_inactivos: true, pareja_id: parejaId });
+      return (mats ?? []).map((m) => ({
+        material_id: m.id!,
+        nombre: m.nombre,
+        stock_actual: Number(m.stock_actual ?? 0),
+        stock_minimo: Number(m.stock_minimo ?? 0),
+        unidad_base: m.unidad_base,
+        estado_stock: getEstadoStock(m),
+      }));
+    } catch (e) {
+      console.error('Error listando materiales con estado stock:', e);
+      return [];
     }
   }
 
@@ -131,6 +174,7 @@ export class MaterialesService {
       const parejaId = await this.requireParejaId();
 
       const payload: any = { ...cambios };
+      delete payload.stock_actual;
       if (
         payload.unidad_compra ||
         payload.cantidad_compra != null ||
