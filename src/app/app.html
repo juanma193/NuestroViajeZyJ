@@ -154,6 +154,41 @@
               <span class="text-gray-500">›</span>
             </a>
 
+            <div class="pt-3">
+              <div class="px-3 text-xs font-extrabold text-gray-700/70">EMPRENDIMIENTO</div>
+              <div class="space-y-2 mt-2">
+                <a
+                  (click)="closeMenu()"
+                  routerLink="/emprendimiento/materiales"
+                  routerLinkActive="bg-white/55 shadow-md ring-1 ring-white/70 text-gray-900"
+                  class="flex items-center justify-between px-3 py-3 rounded-2xl text-sm font-extrabold text-gray-800 bg-white/20 hover:bg-white/35 transition"
+                >
+                  <span class="flex items-center gap-2">🧺 <span>Materiales</span></span>
+                  <span class="text-gray-500">›</span>
+                </a>
+
+                <a
+                  (click)="closeMenu()"
+                  routerLink="/emprendimiento/productos"
+                  routerLinkActive="bg-white/55 shadow-md ring-1 ring-white/70 text-gray-900"
+                  class="flex items-center justify-between px-3 py-3 rounded-2xl text-sm font-extrabold text-gray-800 bg-white/20 hover:bg-white/35 transition"
+                >
+                  <span class="flex items-center gap-2">🕯️ <span>Productos</span></span>
+                  <span class="text-gray-500">›</span>
+                </a>
+
+                <a
+                  (click)="closeMenu()"
+                  routerLink="/emprendimiento/calculadora"
+                  routerLinkActive="bg-white/55 shadow-md ring-1 ring-white/70 text-gray-900"
+                  class="flex items-center justify-between px-3 py-3 rounded-2xl text-sm font-extrabold text-gray-800 bg-white/20 hover:bg-white/35 transition"
+                >
+                  <span class="flex items-center gap-2">🧮 <span>Calculadora</span></span>
+                  <span class="text-gray-500">›</span>
+                </a>
+              </div>
+            </div>
+
             <div class="pt-3 space-y-2">
               <a
                 *ngIf="isAuthed"

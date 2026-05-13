@@ -9,6 +9,38 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'emprendimiento/materiales',
+    canActivate: [authGuard, pairGuard],
+    loadComponent: () =>
+      import('./modules/emprendimiento/materiales/emprendimiento-materiales.component').then(
+        (m) => m.EmprendimientoMaterialesComponent
+      ),
+  },
+  {
+    path: 'emprendimiento/productos/:id',
+    canActivate: [authGuard, pairGuard],
+    loadComponent: () =>
+      import('./modules/emprendimiento/producto-detalle/emprendimiento-producto-detalle.component').then(
+        (m) => m.EmprendimientoProductoDetalleComponent
+      ),
+  },
+  {
+    path: 'emprendimiento/productos',
+    canActivate: [authGuard, pairGuard],
+    loadComponent: () =>
+      import('./modules/emprendimiento/productos/emprendimiento-productos.component').then(
+        (m) => m.EmprendimientoProductosComponent
+      ),
+  },
+  {
+    path: 'emprendimiento/calculadora',
+    canActivate: [authGuard, pairGuard],
+    loadComponent: () =>
+      import('./modules/emprendimiento/calculadora/emprendimiento-calculadora.component').then(
+        (m) => m.EmprendimientoCalculadoraComponent
+      ),
+  },
+  {
     path: 'inicio',
     canActivate: [authGuard, pairGuard],
     loadComponent: () => import('./modules/inicio/inicio.component').then(m => m.InicioComponent)
