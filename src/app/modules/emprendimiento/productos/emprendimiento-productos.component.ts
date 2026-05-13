@@ -22,6 +22,10 @@ export class EmprendimientoProductosComponent implements OnInit {
 
   mostrandoFormulario = false;
   editandoId?: number;
+  productoEditando: Producto | null = null;
+  fotoFile: File | null = null;
+  fotoPreviewUrl: string | null = null;
+  fotoError = '';
 
   form: {
     nombre: string;
@@ -81,12 +85,15 @@ export class EmprendimientoProductosComponent implements OnInit {
 
   abrirNuevo() {
     this.editandoId = undefined;
+    this.productoEditando = null;
     this.form = this.getFormInicial();
+    this.limpiarFotoSeleccionada();
     this.mostrandoFormulario = true;
   }
 
   abrirEditar(producto: Producto) {
     this.editandoId = producto.id;
+    this.productoEditando = producto;
     this.form = {
       nombre: producto.nombre ?? '',
       descripcion: producto.descripcion ?? '',
@@ -96,13 +103,69 @@ export class EmprendimientoProductosComponent implements OnInit {
       precio_manual: producto.precio_manual ?? null,
       activo: producto.activo ?? true,
     };
+    this.limpiarFotoSeleccionada();
     this.mostrandoFormulario = true;
   }
 
   cerrarFormulario() {
     this.mostrandoFormulario = false;
     this.editandoId = undefined;
+    this.productoEditando = null;
     this.form = this.getFormInicial();
+    this.limpiarFotoSeleccionada();
+  }
+
+  get fotoActualUrl(): string | null {
+    if (this.fotoPreviewUrl) return this.fotoPreviewUrl;
+    if (this.productoEditando?.foto_url) return this.productoEditando.foto_url;
+    if (this.productoEditando?.foto_path) {
+      return this.productosService.getProductoFotoUrl(this.productoEditando.foto_path);
+    }
+    return null;
+  }
+
+  fotoUrl(producto: Producto): string | null {
+    return producto.foto_url || this.productosService.getProductoFotoUrl(producto.foto_path);
+  }
+
+  onFotoSeleccionada(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.limpiarFotoSeleccionada();
+
+    if (!file) return;
+
+    const extensionesPermitidas = ['jpg', 'jpeg', 'png', 'webp'];
+    const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+    if (!file.type.startsWith('image/') || !extensionesPermitidas.includes(extension)) {
+      this.fotoError = 'Seleccioná una imagen JPG, PNG o WebP';
+      input.value = '';
+      return;
+    }
+
+    const maxBytes = 3 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      this.fotoError = 'La imagen no puede superar los 3MB';
+      input.value = '';
+      return;
+    }
+
+    this.fotoFile = file;
+    this.fotoPreviewUrl = URL.createObjectURL(file);
+  }
+
+  quitarFotoSeleccionada(input?: HTMLInputElement) {
+    this.limpiarFotoSeleccionada();
+    if (input) input.value = '';
+  }
+
+  private limpiarFotoSeleccionada() {
+    if (this.fotoPreviewUrl) {
+      URL.revokeObjectURL(this.fotoPreviewUrl);
+    }
+    this.fotoFile = null;
+    this.fotoPreviewUrl = null;
+    this.fotoError = '';
   }
 
   async guardar() {
@@ -166,6 +229,15 @@ export class EmprendimientoProductosComponent implements OnInit {
         return;
       }
 
+      if (this.fotoFile && res.id) {
+        const fotoOk = await this.guardarFotoProducto(res);
+        if (!fotoOk) {
+          this.toast.showError('Error', 'El producto se guardó, pero no se pudo subir la foto');
+          await this.cargar();
+          return;
+        }
+      }
+
       this.toast.showSuccess('Éxito', 'Producto guardado');
       this.cerrarFormulario();
       await this.cargar();
@@ -197,5 +269,35 @@ export class EmprendimientoProductosComponent implements OnInit {
       this.cargando = false;
       this.cdr.detectChanges();
     }
+  }
+
+  private async guardarFotoProducto(producto: Producto): Promise<boolean> {
+    if (!producto.id || !this.fotoFile) return true;
+
+    const fotoAnteriorPath = this.productoEditando?.foto_path ?? null;
+    const subida = await this.productosService.uploadProductoFoto(
+      producto.id,
+      producto.pareja_id,
+      this.fotoFile,
+    );
+
+    if (!subida) return false;
+
+    const actualizado = await this.productosService.updateProductoFoto(
+      producto.id,
+      subida.path,
+      subida.publicUrl,
+    );
+
+    if (!actualizado) {
+      await this.productosService.deleteProductoFoto(subida.path);
+      return false;
+    }
+
+    if (fotoAnteriorPath && fotoAnteriorPath !== subida.path) {
+      await this.productosService.deleteProductoFoto(fotoAnteriorPath);
+    }
+
+    return true;
   }
 }

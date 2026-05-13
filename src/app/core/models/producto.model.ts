@@ -17,6 +17,8 @@ export interface Producto {
   precio_manual?: number | null;
 
   observaciones?: string | null;
+  foto_path?: string | null;
+  foto_url?: string | null;
 
   activo?: boolean;
 }

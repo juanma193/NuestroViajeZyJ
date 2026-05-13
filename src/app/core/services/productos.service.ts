@@ -9,11 +9,17 @@ export interface ListarProductosParams {
   pareja_id?: string;
 }
 
+export interface ProductoFotoUploadResult {
+  path: string;
+  publicUrl: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class ProductosService {
   private readonly table = 'productos';
+  private readonly fotosBucket = 'productos-emprendimiento';
 
   constructor(
     private supabase: SupabaseService,
@@ -226,5 +232,108 @@ export class ProductosService {
       console.error('Error guardando costos de producto:', e);
       return false;
     }
+  }
+
+  async uploadProductoFoto(
+    productoId: number,
+    parejaId: string | undefined,
+    file: File,
+  ): Promise<ProductoFotoUploadResult | null> {
+    try {
+      const pid = await this.requireParejaId(parejaId);
+      const fileExt = this.getSafeFileExtension(file);
+      if (!fileExt) {
+        console.error('Extensión de imagen no permitida');
+        return null;
+      }
+
+      const filePath = `${pid}/productos/${productoId}-${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await this.supabase.supabase.storage
+        .from(this.fotosBucket)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true,
+          contentType: file.type,
+        });
+
+      if (uploadError) {
+        console.error('Error subiendo foto de producto:', uploadError);
+        return null;
+      }
+
+      const { data } = this.supabase.supabase.storage
+        .from(this.fotosBucket)
+        .getPublicUrl(filePath);
+
+      return {
+        path: filePath,
+        publicUrl: data.publicUrl,
+      };
+    } catch (e) {
+      console.error('Error subiendo foto de producto:', e);
+      return null;
+    }
+  }
+
+  async deleteProductoFoto(path: string | null | undefined): Promise<boolean> {
+    if (!path) return true;
+    try {
+      const { error } = await this.supabase.supabase.storage
+        .from(this.fotosBucket)
+        .remove([path]);
+
+      if (error) {
+        console.error('Error eliminando foto de producto:', error);
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      console.error('Error eliminando foto de producto:', e);
+      return false;
+    }
+  }
+
+  getProductoFotoUrl(path: string | null | undefined): string | null {
+    if (!path) return null;
+    const { data } = this.supabase.supabase.storage.from(this.fotosBucket).getPublicUrl(path);
+    return data.publicUrl ?? null;
+  }
+
+  async updateProductoFoto(
+    productoId: number,
+    fotoPath: string | null,
+    fotoUrl: string | null,
+  ): Promise<Producto | null> {
+    try {
+      const parejaId = await this.requireParejaId();
+      const { data, error } = await this.supabase.supabase
+        .from(this.table)
+        .update({
+          foto_path: fotoPath,
+          foto_url: fotoUrl,
+        })
+        .eq('id', productoId)
+        .eq('pareja_id', parejaId)
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('Error actualizando foto de producto:', error);
+        return null;
+      }
+
+      return (data as Producto) ?? null;
+    } catch (e) {
+      console.error('Error actualizando foto de producto:', e);
+      return null;
+    }
+  }
+
+  private getSafeFileExtension(file: File): string | null {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    const allowed = ['jpg', 'jpeg', 'png', 'webp'];
+    if (!ext || !allowed.includes(ext)) return null;
+    return ext;
   }
 }

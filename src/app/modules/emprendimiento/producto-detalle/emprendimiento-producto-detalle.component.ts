@@ -149,6 +149,10 @@ export class EmprendimientoProductoDetalleComponent implements OnInit {
     return res.items[0]?.costo ?? 0;
   }
 
+  fotoUrl(producto: Producto): string | null {
+    return producto.foto_url || this.productosService.getProductoFotoUrl(producto.foto_path);
+  }
+
   async agregarMaterial() {
     if (!this.productoId || !this.producto) return;
     const material = this.materialSeleccionadoNuevo();
