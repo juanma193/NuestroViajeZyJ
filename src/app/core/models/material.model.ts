@@ -1,11 +1,4 @@
-export type UnidadCantidad =
-  | 'gr'
-  | 'kg'
-  | 'ml'
-  | 'cc'
-  | 'litro'
-  | 'unidad'
-  | 'metro';
+export type UnidadCantidad = 'gr' | 'kg' | 'ml' | 'cc' | 'litro' | 'unidad' | 'metro';
 
 export type UnidadBaseUso = 'gr' | 'ml' | 'cc' | 'unidad' | 'metro';
 

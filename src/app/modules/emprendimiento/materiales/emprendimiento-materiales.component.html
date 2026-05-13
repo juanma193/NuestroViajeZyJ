@@ -17,8 +17,20 @@
 
   <div *ngIf="cargando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
     <div class="flex flex-col items-center gap-4">
-      <svg class="w-14 h-14 text-pink-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <svg
+        class="w-14 h-14 text-pink-500 animate-spin"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
       </svg>
       <span class="text-white font-semibold">Cargando...</span>
@@ -58,13 +70,20 @@
   </div>
 
   <!-- formulario -->
-  <div *ngIf="mostrandoFormulario" class="mt-6 bg-white rounded-2xl border border-pink-200 shadow p-5">
+  <div
+    *ngIf="mostrandoFormulario"
+    class="mt-6 bg-white rounded-2xl border border-pink-200 shadow p-5"
+  >
     <div class="flex items-start justify-between gap-4">
       <div>
-        <h2 class="text-lg font-bold text-pink-600">{{ editandoId ? 'Editar material' : 'Nuevo material' }}</h2>
+        <h2 class="text-lg font-bold text-pink-600">
+          {{ editandoId ? 'Editar material' : 'Nuevo material' }}
+        </h2>
         <p class="text-sm text-gray-600">El costo unitario se calcula antes de guardar</p>
       </div>
-      <button class="px-3 py-2 rounded-xl border" (click)="cerrarFormulario()" type="button">✕</button>
+      <button class="px-3 py-2 rounded-xl border" (click)="cerrarFormulario()" type="button">
+        ✕
+      </button>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
@@ -184,12 +203,15 @@
       <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
         <div class="text-xs font-semibold text-gray-600">Costo unitario calculado</div>
         <div class="text-lg font-bold text-gray-900">
-          {{ costoUnitarioPreview == null ? '—' : (costoUnitarioPreview | number:'1.2-2') }}
+          {{ costoUnitarioPreview == null ? '—' : (costoUnitarioPreview | number: '1.2-2') }}
         </div>
       </div>
       <div class="bg-white border border-gray-200 rounded-xl p-3">
         <div class="text-xs font-semibold text-gray-600">Validación</div>
-        <div class="text-sm font-bold" [ngClass]="costoUnitarioPreview == null ? 'text-red-600' : 'text-green-700'">
+        <div
+          class="text-sm font-bold"
+          [ngClass]="costoUnitarioPreview == null ? 'text-red-600' : 'text-green-700'"
+        >
           {{ costoUnitarioPreview == null ? 'Falta info para calcular' : 'OK para guardar' }}
         </div>
       </div>
@@ -204,13 +226,18 @@
       >
         💾 Guardar
       </button>
-      <button class="px-4 py-2 rounded-xl border" (click)="cerrarFormulario()" type="button">Cancelar</button>
+      <button class="px-4 py-2 rounded-xl border" (click)="cerrarFormulario()" type="button">
+        Cancelar
+      </button>
     </div>
   </div>
 
   <!-- listado -->
   <div class="mt-6 space-y-3">
-    <div *ngIf="!cargando && materialesFiltrados.length === 0" class="text-center py-10 text-gray-500">
+    <div
+      *ngIf="!cargando && materialesFiltrados.length === 0"
+      class="text-center py-10 text-gray-500"
+    >
       No hay materiales para mostrar
     </div>
 
@@ -223,16 +250,27 @@
         <div class="min-w-0">
           <div class="flex items-center gap-2">
             <h3 class="font-bold text-gray-900 truncate">{{ m.nombre }}</h3>
-            <span *ngIf="!(m.activo ?? true)" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">Inactivo</span>
-            <span *ngIf="alertaStock(m)" class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">Stock bajo</span>
+            <span
+              *ngIf="!(m.activo ?? true)"
+              class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700"
+              >Inactivo</span
+            >
+            <span
+              *ngIf="alertaStock(m)"
+              class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700"
+              >Stock bajo</span
+            >
           </div>
           <p class="text-sm text-gray-600 mt-1">
-            {{ nombreCategoria(m.categoria_id) }} • Compra: {{ m.cantidad_compra }} {{ m.unidad_compra }} • Base: {{ m.unidad_base }}
+            {{ nombreCategoria(m.categoria_id) }} • Compra: {{ m.cantidad_compra }}
+            {{ m.unidad_compra }} • Base: {{ m.unidad_base }}
           </p>
           <div class="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div class="bg-rose-50 rounded-xl p-2 border border-rose-100">
               <div class="text-[11px] font-semibold text-gray-600">Costo unitario</div>
-              <div class="text-sm font-bold text-gray-900">{{ m.costo_unitario | number:'1.2-2' }}</div>
+              <div class="text-sm font-bold text-gray-900">
+                {{ m.costo_unitario | number: '1.2-2' }}
+              </div>
             </div>
             <div class="bg-white rounded-xl p-2 border border-gray-200">
               <div class="text-[11px] font-semibold text-gray-600">Stock</div>
@@ -250,18 +288,19 @@
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
-          <button class="px-3 py-2 rounded-xl border" (click)="abrirEditar(m)" type="button">✏️</button>
-          <button
-            class="px-3 py-2 rounded-xl border"
-            (click)="toggleActivo(m)"
-            type="button"
-          >
+          <button class="px-3 py-2 rounded-xl border" (click)="abrirEditar(m)" type="button">
+            ✏️
+          </button>
+          <button class="px-3 py-2 rounded-xl border" (click)="toggleActivo(m)" type="button">
             {{ (m.activo ?? true) ? '⏸️' : '▶️' }}
           </button>
         </div>
       </div>
 
-      <p *ngIf="m.observaciones" class="text-sm text-gray-600 mt-3 bg-gray-50 rounded-xl p-3 border border-gray-100">
+      <p
+        *ngIf="m.observaciones"
+        class="text-sm text-gray-600 mt-3 bg-gray-50 rounded-xl p-3 border border-gray-100"
+      >
         {{ m.observaciones }}
       </p>
     </div>

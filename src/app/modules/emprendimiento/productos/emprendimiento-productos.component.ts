@@ -27,8 +27,8 @@ export class EmprendimientoProductosComponent implements OnInit {
     nombre: string;
     descripcion: string;
     categoria: string;
-    tiempo_produccion_min: number | null;
-    margen_ganancia_pct: number | null;
+    tiempo_produccion_minutos: number | null;
+    margen_porcentaje: number | null;
     precio_manual: number | null;
     activo: boolean;
   } = this.getFormInicial();
@@ -36,7 +36,7 @@ export class EmprendimientoProductosComponent implements OnInit {
   constructor(
     private productosService: ProductosService,
     private toast: ToastService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -57,8 +57,8 @@ export class EmprendimientoProductosComponent implements OnInit {
       nombre: '',
       descripcion: '',
       categoria: '',
-      tiempo_produccion_min: null,
-      margen_ganancia_pct: 60,
+      tiempo_produccion_minutos: null,
+      margen_porcentaje: 60,
       precio_manual: null,
       activo: true,
     };
@@ -91,8 +91,8 @@ export class EmprendimientoProductosComponent implements OnInit {
       nombre: producto.nombre ?? '',
       descripcion: producto.descripcion ?? '',
       categoria: producto.categoria ?? '',
-      tiempo_produccion_min: producto.tiempo_produccion_min ?? null,
-      margen_ganancia_pct: producto.margen_ganancia_pct ?? 0,
+      tiempo_produccion_minutos: producto.tiempo_produccion_minutos ?? null,
+      margen_porcentaje: producto.margen_porcentaje ?? 0,
       precio_manual: producto.precio_manual ?? null,
       activo: producto.activo ?? true,
     };
@@ -112,13 +112,16 @@ export class EmprendimientoProductosComponent implements OnInit {
       return;
     }
 
-    const margen = Number(this.form.margen_ganancia_pct);
+    const margen = Number(this.form.margen_porcentaje);
     if (!Number.isFinite(margen) || margen < 0) {
       this.toast.showWarning('Revisar datos', 'El margen debe ser ≥ 0');
       return;
     }
 
-    const tiempo = this.form.tiempo_produccion_min == null ? null : Number(this.form.tiempo_produccion_min);
+    const tiempo =
+      this.form.tiempo_produccion_minutos == null
+        ? null
+        : Number(this.form.tiempo_produccion_minutos);
     if (tiempo != null && (!Number.isFinite(tiempo) || tiempo < 0)) {
       this.toast.showWarning('Revisar datos', 'El tiempo de producción debe ser ≥ 0');
       return;
@@ -134,23 +137,28 @@ export class EmprendimientoProductosComponent implements OnInit {
       this.cargando = true;
       this.cdr.detectChanges();
 
-      const payload: Omit<Producto, 'id' | 'pareja_id'> = {
+      const basePayload: Partial<Producto> = {
         nombre,
         descripcion: this.form.descripcion.trim() ? this.form.descripcion.trim() : null,
         categoria: this.form.categoria.trim() ? this.form.categoria.trim() : null,
-        tiempo_produccion_min: tiempo,
-        margen_ganancia_pct: margen,
-        costo_calculado: null,
-        precio_sugerido: null,
+        tiempo_produccion_minutos: tiempo,
+        margen_porcentaje: margen,
         precio_manual: precioManual,
         activo: this.form.activo,
       };
 
       let res: Producto | null = null;
       if (this.editandoId) {
-        res = await this.productosService.actualizar(this.editandoId, payload as any);
+        // Importante: no sobrescribir costo_calculado/precio_sugerido si no estás guardando receta.
+        res = await this.productosService.actualizar(this.editandoId, basePayload);
       } else {
-        res = await this.productosService.crear(payload);
+        // Tu DB tiene costo_calculado NOT NULL, así que inicializamos en 0.
+        const createPayload: Omit<Producto, 'id' | 'pareja_id'> = {
+          ...(basePayload as Omit<Producto, 'id' | 'pareja_id'>),
+          costo_calculado: 0,
+          precio_sugerido: 0,
+        };
+        res = await this.productosService.crear(createPayload);
       }
 
       if (!res) {

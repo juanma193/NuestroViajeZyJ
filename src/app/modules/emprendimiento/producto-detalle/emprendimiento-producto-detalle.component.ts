@@ -44,7 +44,7 @@ export class EmprendimientoProductoDetalleComponent implements OnInit {
     private materialesService: MaterialesService,
     private costos: EmprendimientoCostosService,
     private toast: ToastService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -63,7 +63,7 @@ export class EmprendimientoProductoDetalleComponent implements OnInit {
     return this.costos.calcularProducto({
       producto: this.producto,
       items: this.items,
-      margen_ganancia_pct: this.margenEdicion ?? this.producto.margen_ganancia_pct,
+      margen_porcentaje: this.margenEdicion ?? this.producto.margen_porcentaje,
     });
   }
 
@@ -105,7 +105,7 @@ export class EmprendimientoProductoDetalleComponent implements OnInit {
       ]);
 
       this.producto = producto;
-      this.margenEdicion = producto?.margen_ganancia_pct ?? null;
+      this.margenEdicion = producto?.margen_porcentaje ?? null;
       this.receta = receta;
       this.materiales = materiales;
 
@@ -141,7 +141,11 @@ export class EmprendimientoProductoDetalleComponent implements OnInit {
   }
 
   costoItem(item: ProductoMaterialConMaterial): number {
-    const res = this.costos.calcularProducto({ producto: this.producto!, items: [item], margen_ganancia_pct: 0 });
+    const res = this.costos.calcularProducto({
+      producto: this.producto!,
+      items: [item],
+      margen_porcentaje: 0,
+    });
     return res.items[0]?.costo ?? 0;
   }
 
@@ -161,7 +165,11 @@ export class EmprendimientoProductoDetalleComponent implements OnInit {
 
     const unidad = this.nuevo.unidad_uso ?? material.unidad_base;
     // Verificar conversión (ml <-> cc permitido)
-    const cantidadBase = this.costos.convertirCantidadUsoAUnidadBase(cantidad, unidad, material.unidad_base);
+    const cantidadBase = this.costos.convertirCantidadUsoAUnidadBase(
+      cantidad,
+      unidad,
+      material.unidad_base,
+    );
     if (cantidadBase == null) {
       this.toast.showWarning('Revisar datos', 'La unidad de uso no es compatible con el material');
       return;
@@ -252,19 +260,19 @@ export class EmprendimientoProductoDetalleComponent implements OnInit {
           const cantidadBase = this.costos.convertirCantidadUsoAUnidadBase(
             it.receta.cantidad_usada,
             it.receta.unidad_uso,
-            material.unidad_base
+            material.unidad_base,
           );
-          const costo = (cantidadBase == null ? 0 : cantidadBase * (material.costo_unitario ?? 0));
+          const costo = cantidadBase == null ? 0 : cantidadBase * (material.costo_unitario ?? 0);
           await this.recetaService.actualizar(it.receta.id, {
             cantidad_usada: it.receta.cantidad_usada,
             unidad_uso: it.receta.unidad_uso,
             costo_calculado: costo,
           });
-        })
+        }),
       );
 
       // Guardar margen + costos en producto
-      await this.productosService.actualizar(this.productoId, { margen_ganancia_pct: margen });
+      await this.productosService.actualizar(this.productoId, { margen_porcentaje: margen });
       const ok = await this.productosService.actualizarCostos(this.productoId, {
         costo_calculado: result.costo_total,
         precio_sugerido: result.precio_sugerido,

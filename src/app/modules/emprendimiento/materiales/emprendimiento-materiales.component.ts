@@ -48,7 +48,7 @@ export class EmprendimientoMaterialesComponent implements OnInit {
     private materialesService: MaterialesService,
     private costos: EmprendimientoCostosService,
     private toast: ToastService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -56,14 +56,18 @@ export class EmprendimientoMaterialesComponent implements OnInit {
   }
 
   get categoriasConTodas(): Array<{ id: number | 'todas'; nombre: string }> {
-    return [{ id: 'todas', nombre: 'Todas' }, ...this.categorias.map((c) => ({ id: c.id!, nombre: c.nombre }))];
+    return [
+      { id: 'todas', nombre: 'Todas' },
+      ...this.categorias.map((c) => ({ id: c.id!, nombre: c.nombre })),
+    ];
   }
 
   get materialesFiltrados(): Material[] {
     const buscar = this.buscar.trim().toLowerCase();
     return (this.materiales ?? []).filter((m) => {
       if (!this.mostrarInactivos && !m.activo) return false;
-      if (this.categoriaFiltro !== 'todas' && (m.categoria_id ?? null) !== this.categoriaFiltro) return false;
+      if (this.categoriaFiltro !== 'todas' && (m.categoria_id ?? null) !== this.categoriaFiltro)
+        return false;
       if (buscar && !(m.nombre ?? '').toLowerCase().includes(buscar)) return false;
       return true;
     });

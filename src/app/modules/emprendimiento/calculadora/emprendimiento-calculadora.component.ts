@@ -39,7 +39,7 @@ export class EmprendimientoCalculadoraComponent implements OnInit {
     private materialesService: MaterialesService,
     public costos: EmprendimientoCostosService,
     private toast: ToastService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -69,9 +69,15 @@ export class EmprendimientoCalculadoraComponent implements OnInit {
 
   get resultado() {
     if (!this.producto) return null;
-    const margen = this.margenSimulado ?? this.producto.margen_ganancia_pct;
-    const res = this.costos.calcularProducto({ producto: this.producto, items: this.items, margen_ganancia_pct: margen });
-    const precio = this.redondear ? this.costos.redondearPrecio(res.precio_sugerido) : res.precio_sugerido;
+    const margen = this.margenSimulado ?? this.producto.margen_porcentaje;
+    const res = this.costos.calcularProducto({
+      producto: this.producto,
+      items: this.items,
+      margen_porcentaje: margen,
+    });
+    const precio = this.redondear
+      ? this.costos.redondearPrecio(res.precio_sugerido)
+      : res.precio_sugerido;
     return { ...res, precio_sugerido: precio };
   }
 
@@ -107,7 +113,7 @@ export class EmprendimientoCalculadoraComponent implements OnInit {
 
       const receta = await this.recetaService.listarPorProducto(this.productoIdSeleccionado);
       this.producto = producto;
-      this.margenSimulado = producto.margen_ganancia_pct;
+      this.margenSimulado = producto.margen_porcentaje;
 
       const map = new Map<number, Material>();
       for (const m of this.materiales ?? []) {

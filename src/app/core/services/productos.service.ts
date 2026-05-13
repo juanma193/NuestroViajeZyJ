@@ -14,7 +14,26 @@ export interface ListarProductosParams {
 export class ProductosService {
   private readonly table = 'productos';
 
-  constructor(private supabase: SupabaseService, private parejasService: ParejasService) {}
+  constructor(
+    private supabase: SupabaseService,
+    private parejasService: ParejasService,
+  ) {}
+
+  private stripUnknownColumnFromPayload(
+    payload: Record<string, any>,
+    error: any,
+  ): { payload: Record<string, any>; removed?: string } {
+    const message = String(error?.message ?? '');
+    const match = message.match(/Could not find the '([^']+)' column/);
+    const column = match?.[1];
+    if (!column) return { payload };
+
+    if (!(column in payload)) return { payload };
+
+    const next = { ...payload };
+    delete next[column];
+    return { payload: next, removed: column };
+  }
 
   private async requireParejaId(): Promise<string> {
     const parejaId = await this.parejasService.getParejaIdActual();
@@ -81,14 +100,22 @@ export class ProductosService {
       const record: Producto = {
         ...payload,
         pareja_id: parejaId,
-        margen_ganancia_pct: Math.max(0, payload.margen_ganancia_pct ?? 0),
+        margen_porcentaje: Math.max(0, payload.margen_porcentaje ?? 0),
       };
 
-      const { data, error } = await this.supabase.supabase
-        .from(this.table)
-        .insert([record])
-        .select('*')
-        .single();
+      const attempt = async (row: any) =>
+        this.supabase.supabase.from(this.table).insert([row]).select('*').single();
+
+      let { data, error } = await attempt(record);
+      if (error?.code === 'PGRST204') {
+        const stripped = this.stripUnknownColumnFromPayload(record as any, error);
+        if (stripped.removed) {
+          console.warn(
+            `Columna inexistente en '${this.table}': '${stripped.removed}'. Reintentando insert sin ese campo.`,
+          );
+          ({ data, error } = await attempt(stripped.payload));
+        }
+      }
 
       if (error) {
         console.error('Error creando producto:', error);
@@ -107,17 +134,30 @@ export class ProductosService {
       const parejaId = await this.requireParejaId();
 
       const payload: any = { ...cambios };
-      if (payload.margen_ganancia_pct != null) {
-        payload.margen_ganancia_pct = Math.max(0, Number(payload.margen_ganancia_pct));
+      if (payload.margen_porcentaje != null) {
+        payload.margen_porcentaje = Math.max(0, Number(payload.margen_porcentaje));
       }
 
-      const { data, error } = await this.supabase.supabase
-        .from(this.table)
-        .update(payload)
-        .eq('id', id)
-        .eq('pareja_id', parejaId)
-        .select('*')
-        .single();
+      const attempt = async (pl: any) =>
+        this.supabase.supabase
+          .from(this.table)
+          .update(pl)
+          .eq('id', id)
+          .eq('pareja_id', parejaId)
+          .select('*')
+          .single();
+
+      let { data, error } = await attempt(payload);
+
+      if (error?.code === 'PGRST204') {
+        const stripped = this.stripUnknownColumnFromPayload(payload, error);
+        if (stripped.removed) {
+          console.warn(
+            `Columna inexistente en '${this.table}': '${stripped.removed}'. Reintentando update sin ese campo.`,
+          );
+          ({ data, error } = await attempt(stripped.payload));
+        }
+      }
 
       if (error) {
         console.error('Error actualizando producto:', error);
@@ -152,7 +192,10 @@ export class ProductosService {
     }
   }
 
-  async actualizarCostos(id: number, costos: { costo_calculado: number; precio_sugerido: number }): Promise<boolean> {
+  async actualizarCostos(
+    id: number,
+    costos: { costo_calculado: number; precio_sugerido: number },
+  ): Promise<boolean> {
     try {
       const parejaId = await this.requireParejaId();
       const { error } = await this.supabase.supabase

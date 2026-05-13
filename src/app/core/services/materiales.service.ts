@@ -19,7 +19,7 @@ export class MaterialesService {
   constructor(
     private supabase: SupabaseService,
     private parejasService: ParejasService,
-    private costos: EmprendimientoCostosService
+    private costos: EmprendimientoCostosService,
   ) {}
 
   private async requireParejaId(): Promise<string> {
@@ -85,7 +85,9 @@ export class MaterialesService {
     }
   }
 
-  async crear(payload: Omit<Material, 'id' | 'pareja_id' | 'costo_unitario' | 'unidad_base'>): Promise<Material | null> {
+  async crear(
+    payload: Omit<Material, 'id' | 'pareja_id' | 'costo_unitario' | 'unidad_base'>,
+  ): Promise<Material | null> {
     try {
       const parejaId = await this.requireParejaId();
 
@@ -141,7 +143,11 @@ export class MaterialesService {
         const cantidad_compra = Number(payload.cantidad_compra ?? current.cantidad_compra);
         const precio_compra = Number(payload.precio_compra ?? current.precio_compra);
 
-        const costo = this.costos.calcularCostoUnitarioMaterial({ unidad_compra, cantidad_compra, precio_compra });
+        const costo = this.costos.calcularCostoUnitarioMaterial({
+          unidad_compra,
+          cantidad_compra,
+          precio_compra,
+        });
         if (!costo) {
           throw new Error('No se pudo recalcular el costo unitario.');
         }

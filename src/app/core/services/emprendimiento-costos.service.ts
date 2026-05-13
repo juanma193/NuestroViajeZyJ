@@ -40,16 +40,19 @@ export class EmprendimientoCostosService {
   calcularProducto(params: {
     producto: Producto;
     items: ProductoMaterialConMaterial[];
-    margen_ganancia_pct?: number;
+    margen_porcentaje?: number;
   }): ResultadoCalculoProducto {
-    const margen = Math.max(0, params.margen_ganancia_pct ?? params.producto.margen_ganancia_pct ?? 0);
+    const margen = Math.max(
+      0,
+      params.margen_porcentaje ?? params.producto.margen_porcentaje ?? 0,
+    );
 
     const items = (params.items ?? []).map((item) => {
       const material = item.material as Material;
       const cantidadBase = this.convertirCantidadUsoAUnidadBase(
         item.receta.cantidad_usada,
         item.receta.unidad_uso,
-        material.unidad_base
+        material.unidad_base,
       );
 
       const costo = cantidadBase == null ? 0 : cantidadBase * (material.costo_unitario ?? 0);
@@ -73,7 +76,7 @@ export class EmprendimientoCostosService {
 
   normalizarCantidadCompra(
     unidad_compra: UnidadCantidad,
-    cantidad_compra: number
+    cantidad_compra: number,
   ): { unidad_base: UnidadBaseUso; cantidad_base: number } | null {
     if (!Number.isFinite(cantidad_compra) || cantidad_compra <= 0) return null;
 
@@ -100,14 +103,17 @@ export class EmprendimientoCostosService {
   convertirCantidadUsoAUnidadBase(
     cantidad: number,
     unidad_uso: UnidadBaseUso,
-    unidad_base: UnidadBaseUso
+    unidad_base: UnidadBaseUso,
   ): number | null {
     if (!Number.isFinite(cantidad) || cantidad < 0) return null;
 
     if (unidad_uso === unidad_base) return cantidad;
 
     // ml <-> cc (equivalentes)
-    if ((unidad_uso === 'ml' && unidad_base === 'cc') || (unidad_uso === 'cc' && unidad_base === 'ml')) {
+    if (
+      (unidad_uso === 'ml' && unidad_base === 'cc') ||
+      (unidad_uso === 'cc' && unidad_base === 'ml')
+    ) {
       return cantidad;
     }
 

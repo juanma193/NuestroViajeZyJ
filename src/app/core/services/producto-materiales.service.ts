@@ -9,7 +9,10 @@ import type { ProductoMaterial } from '../models/producto-material.model';
 export class ProductoMaterialesService {
   private readonly table = 'producto_materiales';
 
-  constructor(private supabase: SupabaseService, private parejasService: ParejasService) {}
+  constructor(
+    private supabase: SupabaseService,
+    private parejasService: ParejasService,
+  ) {}
 
   private async requireParejaId(): Promise<string> {
     const parejaId = await this.parejasService.getParejaIdActual();
@@ -39,7 +42,9 @@ export class ProductoMaterialesService {
     }
   }
 
-  async agregar(payload: Omit<ProductoMaterial, 'id' | 'pareja_id'>): Promise<ProductoMaterial | null> {
+  async agregar(
+    payload: Omit<ProductoMaterial, 'id' | 'pareja_id'>,
+  ): Promise<ProductoMaterial | null> {
     try {
       const parejaId = await this.requireParejaId();
       const { data, error } = await this.supabase.supabase
@@ -60,7 +65,10 @@ export class ProductoMaterialesService {
     }
   }
 
-  async actualizar(id: number, cambios: Partial<ProductoMaterial>): Promise<ProductoMaterial | null> {
+  async actualizar(
+    id: number,
+    cambios: Partial<ProductoMaterial>,
+  ): Promise<ProductoMaterial | null> {
     try {
       const parejaId = await this.requireParejaId();
       const { data, error } = await this.supabase.supabase
